@@ -1,6 +1,7 @@
 package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.PetRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
 import com.petadoption.exception.BusinessException;
@@ -14,11 +15,11 @@ import com.petadoption.service.ImageStorageService;
 import com.petadoption.service.PetService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -51,12 +52,13 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public List<PetResponseDto> getAllPets() {
+    public PageResponseDto<PetResponseDto> getAllPets(Pageable pageable) {
 
-        return petRepository.findAll()
-                .stream()
-                .map(petMapper::toResponseDto)
-                .toList();
+        Page<PetResponseDto> page =
+                petRepository.findAll(pageable)
+                        .map(petMapper::toResponseDto);
+
+        return PageResponseDto.from(page);
     }
 
     @Override

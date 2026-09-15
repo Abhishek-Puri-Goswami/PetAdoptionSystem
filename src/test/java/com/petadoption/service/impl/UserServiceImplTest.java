@@ -2,6 +2,7 @@ package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.entity.Role;
 import com.petadoption.entity.User;
@@ -21,6 +22,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,16 +71,18 @@ class UserServiceImplTest {
                         Set.of("ROLE_ADOPTER"),
                         null, null, null, null, null, null, null);
 
-        when(userRepository.findAll())
-                .thenReturn(List.of(user));
+        Pageable pageable = PageRequest.of(0, 20);
+
+        when(userRepository.findAll(pageable))
+                .thenReturn(new PageImpl<>(List.of(user), pageable, 1));
 
         when(userMapper.toResponseDto(user))
                 .thenReturn(response);
 
-        List<UserResponseDto> result =
-                userService.getAllUsers();
+        PageResponseDto<UserResponseDto> result =
+                userService.getAllUsers(pageable);
 
-        assertThat(result)
+        assertThat(result.content())
                 .hasSize(1);
     }
 

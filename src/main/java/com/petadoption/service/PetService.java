@@ -1,16 +1,16 @@
 package com.petadoption.service;
 
 import com.petadoption.dto.request.PetRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 public interface PetService {
 
     PetResponseDto createPet(PetRequestDto request);
 
-    List<PetResponseDto> getAllPets();
+    PageResponseDto<PetResponseDto> getAllPets(Pageable pageable);
 
     PetResponseDto getPetById(Long id);
 

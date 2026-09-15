@@ -279,7 +279,18 @@
               },
               "name": "Get All Users",
               "method": "GET",
-              "params": [],
+              "params": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "active": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "active": false
+                }
+              ],
               "headers": [],
               "endpoint": "<<baseUrl>>/api/users",
               "responses": {},
@@ -607,7 +618,18 @@
               },
               "name": "Get Adoption Applications",
               "method": "GET",
-              "params": [],
+              "params": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "active": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "active": false
+                }
+              ],
               "headers": [],
               "endpoint": "<<baseUrl>>/api/adoptions",
               "responses": {},
@@ -896,7 +918,18 @@
               },
               "name": "Get All Adoption Applications",
               "method": "GET",
-              "params": [],
+              "params": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "active": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "active": false
+                }
+              ],
               "headers": [],
               "endpoint": "<<baseUrl>>/api/adoptions",
               "responses": {},
@@ -1196,7 +1229,18 @@
               },
               "name": "Get All Pets",
               "method": "GET",
-              "params": [],
+              "params": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "active": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "active": false
+                }
+              ],
               "headers": [],
               "endpoint": "<<baseUrl>>/api/pets",
               "responses": {},
@@ -1351,7 +1395,18 @@
               },
               "name": "Get All Pets",
               "method": "GET",
-              "params": [],
+              "params": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "active": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "active": false
+                }
+              ],
               "headers": [],
               "endpoint": "<<baseUrl>>/api/pets",
               "responses": {},

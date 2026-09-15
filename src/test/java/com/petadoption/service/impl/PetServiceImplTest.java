@@ -1,6 +1,7 @@
 package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.PetRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
 import com.petadoption.enums.PetStatus;
@@ -21,6 +22,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -133,25 +137,32 @@ class PetServiceImplTest {
     @Test
     void shouldGetAllPets() {
 
-        when(petRepository.findAll())
+        Pageable pageable = PageRequest.of(0, 20);
+
+        when(petRepository.findAll(pageable))
                 .thenReturn(
-                        List.of(pet)
+                        new PageImpl<>(List.of(pet), pageable, 1)
                 );
 
         when(petMapper.toResponseDto(pet))
                 .thenReturn(responseDto);
 
-        List<PetResponseDto> result =
-                petService.getAllPets();
+        PageResponseDto<PetResponseDto> result =
+                petService.getAllPets(pageable);
 
         assertEquals(
                 1,
-                result.size()
+                result.content().size()
         );
 
         assertEquals(
                 "Buddy",
-                result.get(0).name()
+                result.content().get(0).name()
+        );
+
+        assertEquals(
+                1,
+                result.totalElements()
         );
     }
 

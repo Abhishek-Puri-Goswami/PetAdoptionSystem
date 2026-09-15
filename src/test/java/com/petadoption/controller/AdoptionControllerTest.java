@@ -3,6 +3,7 @@ package com.petadoption.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petadoption.dto.request.AdoptionRequestDto;
 import com.petadoption.dto.response.AdoptionResponseDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.security.JwtAuthenticationFilter;
 import com.petadoption.service.AdoptionService;
 
@@ -66,8 +67,10 @@ class AdoptionControllerTest {
     @Test
     void shouldGetAllApplications() throws Exception {
 
-        when(adoptionService.getAllApplications())
-                .thenReturn(List.of());
+        when(adoptionService.getAllApplications(any()))
+                .thenReturn(
+                        new PageResponseDto<>(
+                                List.of(), 0, 20, 0, 0, true));
 
         mockMvc.perform(get("/api/adoptions"))
                 .andExpect(status().isOk());

@@ -3,16 +3,17 @@ package com.petadoption.controller;
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.ApiResponseDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -44,12 +45,13 @@ public class UserController {
     }
 
     @GetMapping
-    public ApiResponseDto<List<UserResponseDto>> getAllUsers() {
+    public ApiResponseDto<PageResponseDto<UserResponseDto>> getAllUsers(
+            @PageableDefault(size = 20) Pageable pageable) {
 
         return new ApiResponseDto<>(
                 true,
                 "Users fetched successfully",
-                userService.getAllUsers());
+                userService.getAllUsers(pageable));
     }
 
     @GetMapping("/{id}")

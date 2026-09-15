@@ -2,13 +2,13 @@ package com.petadoption.service;
 
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
-    List<UserResponseDto> getAllUsers();
+    PageResponseDto<UserResponseDto> getAllUsers(Pageable pageable);
 
     UserResponseDto getUserById(Long id);
 

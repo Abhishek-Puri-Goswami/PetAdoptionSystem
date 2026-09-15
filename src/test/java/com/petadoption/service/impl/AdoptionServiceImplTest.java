@@ -2,6 +2,7 @@ package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.AdoptionRequestDto;
 import com.petadoption.dto.response.AdoptionResponseDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.entity.AdoptionApplication;
 import com.petadoption.entity.Pet;
 import com.petadoption.entity.User;
@@ -25,6 +26,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -278,16 +282,20 @@ class AdoptionServiceImplTest {
         AdoptionResponseDto dto =
                 mock(AdoptionResponseDto.class);
 
-        when(adoptionRepository.findAll())
-                .thenReturn(List.of(application));
+        Pageable pageable = PageRequest.of(0, 20);
+
+        when(adoptionRepository.findAll(pageable))
+                .thenReturn(
+                        new PageImpl<>(
+                                List.of(application), pageable, 1));
 
         when(adoptionMapper.toResponseDto(application))
                 .thenReturn(dto);
 
-        List<AdoptionResponseDto> result =
-                adoptionService.getAllApplications();
+        PageResponseDto<AdoptionResponseDto> result =
+                adoptionService.getAllApplications(pageable);
 
-        assertThat(result)
+        assertThat(result.content())
                 .hasSize(1);
     }
 

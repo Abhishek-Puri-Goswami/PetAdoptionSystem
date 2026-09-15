@@ -2,6 +2,7 @@ package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.entity.Role;
 import com.petadoption.entity.User;
@@ -14,9 +15,10 @@ import com.petadoption.service.AuditLogService;
 import com.petadoption.service.UserService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,12 +32,14 @@ public class UserServiceImpl implements UserService {
     private final AuditLogService auditLogService;
 
     @Override
-    public List<UserResponseDto> getAllUsers() {
+    public PageResponseDto<UserResponseDto> getAllUsers(
+            Pageable pageable) {
 
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toResponseDto)
-                .toList();
+        Page<UserResponseDto> page =
+                userRepository.findAll(pageable)
+                        .map(userMapper::toResponseDto);
+
+        return PageResponseDto.from(page);
     }
 
     @Override

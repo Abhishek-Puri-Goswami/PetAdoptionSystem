@@ -2,6 +2,7 @@ package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.AdoptionRequestDto;
 import com.petadoption.dto.response.AdoptionResponseDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.entity.AdoptionApplication;
 import com.petadoption.entity.Pet;
 import com.petadoption.entity.User;
@@ -20,6 +21,8 @@ import com.petadoption.service.AdoptionService;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,12 +94,14 @@ public class AdoptionServiceImpl implements AdoptionService {
     }
 
     @Override
-    public List<AdoptionResponseDto> getAllApplications() {
+    public PageResponseDto<AdoptionResponseDto> getAllApplications(
+            Pageable pageable) {
 
-        return adoptionRepository.findAll()
-                .stream()
-                .map(adoptionMapper::toResponseDto)
-                .toList();
+        Page<AdoptionResponseDto> page =
+                adoptionRepository.findAll(pageable)
+                        .map(adoptionMapper::toResponseDto);
+
+        return PageResponseDto.from(page);
     }
 
     @Override

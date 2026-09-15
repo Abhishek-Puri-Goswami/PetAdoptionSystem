@@ -3,6 +3,7 @@ package com.petadoption.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.security.JwtAuthenticationFilter;
 import com.petadoption.service.UserService;
@@ -112,14 +113,16 @@ class UserControllerTest {
     @Test
     void shouldGetAllUsers() throws Exception {
 
-        when(userService.getAllUsers())
-                .thenReturn(List.of(buildUser()));
+        when(userService.getAllUsers(any()))
+                .thenReturn(
+                        new PageResponseDto<>(
+                                List.of(buildUser()), 0, 20, 1, 1, true));
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success")
                         .value(true))
-                .andExpect(jsonPath("$.data.length()")
+                .andExpect(jsonPath("$.data.content.length()")
                         .value(1));
     }
 

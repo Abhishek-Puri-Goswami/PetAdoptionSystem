@@ -2,6 +2,7 @@ package com.petadoption.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petadoption.dto.request.PetRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.security.JwtAuthenticationFilter;
 import com.petadoption.service.PetService;
@@ -44,8 +45,10 @@ class PetControllerTest {
     @Test
     void shouldGetAllPets() throws Exception {
 
-        when(petService.getAllPets())
-                .thenReturn(List.of());
+        when(petService.getAllPets(any()))
+                .thenReturn(
+                        new PageResponseDto<>(
+                                List.of(), 0, 20, 0, 0, true));
 
         mockMvc.perform(get("/api/pets"))
                 .andExpect(status().isOk())

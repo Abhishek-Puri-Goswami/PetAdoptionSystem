@@ -3,9 +3,12 @@ package com.petadoption.controller;
 import com.petadoption.dto.request.AdoptionRequestDto;
 import com.petadoption.dto.response.AdoptionResponseDto;
 import com.petadoption.dto.response.ApiResponseDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.service.AdoptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,13 +37,14 @@ public class AdoptionController {
             "hasAnyRole('SHELTER_STAFF','SHELTER_ADMIN','SYSTEM_ADMIN')"
     )
     @GetMapping
-    public ApiResponseDto<List<AdoptionResponseDto>>
-    getAllApplications() {
+    public ApiResponseDto<PageResponseDto<AdoptionResponseDto>>
+    getAllApplications(
+            @PageableDefault(size = 20) Pageable pageable) {
 
         return new ApiResponseDto<>(
                 true,
                 "Applications fetched successfully",
-                adoptionService.getAllApplications()
+                adoptionService.getAllApplications(pageable)
         );
     }
 

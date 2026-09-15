@@ -2,18 +2,19 @@ package com.petadoption.controller;
 
 import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.ApiResponseDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.service.PetService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/pets")
@@ -37,12 +38,13 @@ public class PetController {
     @PreAuthorize(
             "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
     @GetMapping
-    public ApiResponseDto<List<PetResponseDto>> getAllPets() {
+    public ApiResponseDto<PageResponseDto<PetResponseDto>> getAllPets(
+            @PageableDefault(size = 20) Pageable pageable) {
 
         return new ApiResponseDto<>(
                 true,
                 "Pets fetched successfully",
-                petService.getAllPets()
+                petService.getAllPets(pageable)
         );
     }
 
