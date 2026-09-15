@@ -18,6 +18,7 @@ public class AdoptionController {
 
     private final AdoptionService adoptionService;
 
+    @PreAuthorize("hasRole('ADOPTER')")
     @PostMapping
     public ApiResponseDto<AdoptionResponseDto> createApplication(
             @Valid @RequestBody AdoptionRequestDto request) {

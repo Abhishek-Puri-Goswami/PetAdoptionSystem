@@ -4,8 +4,11 @@ import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
 import com.petadoption.enums.PetStatus;
+import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.PetMapper;
+import com.petadoption.repository.AdoptionApplicationRepository;
+import com.petadoption.repository.AppointmentRepository;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.service.AuditLogService;
 
@@ -35,6 +38,12 @@ class PetServiceImplTest {
 
     @Mock
     private AuditLogService auditLogService;
+
+    @Mock
+    private AdoptionApplicationRepository adoptionApplicationRepository;
+
+    @Mock
+    private AppointmentRepository appointmentRepository;
 
     @InjectMocks
     private PetServiceImpl petService;
@@ -239,6 +248,12 @@ class PetServiceImplTest {
                         Optional.of(pet)
                 );
 
+        when(adoptionApplicationRepository.existsByPetId(1L))
+                .thenReturn(false);
+
+        when(appointmentRepository.existsByPetId(1L))
+                .thenReturn(false);
+
         petService.deletePet(1L);
 
         verify(petRepository)
@@ -252,6 +267,49 @@ class PetServiceImplTest {
                         anyString(),
                         anyString()
                 );
+    }
+
+    @Test
+    void shouldThrowWhenDeletingPetWithExistingApplications() {
+
+        when(petRepository.findById(1L))
+                .thenReturn(
+                        Optional.of(pet)
+                );
+
+        when(adoptionApplicationRepository.existsByPetId(1L))
+                .thenReturn(true);
+
+        assertThrows(
+                BusinessException.class,
+                () -> petService.deletePet(1L)
+        );
+
+        verify(petRepository, never())
+                .delete(any(Pet.class));
+    }
+
+    @Test
+    void shouldThrowWhenDeletingPetWithExistingAppointments() {
+
+        when(petRepository.findById(1L))
+                .thenReturn(
+                        Optional.of(pet)
+                );
+
+        when(adoptionApplicationRepository.existsByPetId(1L))
+                .thenReturn(false);
+
+        when(appointmentRepository.existsByPetId(1L))
+                .thenReturn(true);
+
+        assertThrows(
+                BusinessException.class,
+                () -> petService.deletePet(1L)
+        );
+
+        verify(petRepository, never())
+                .delete(any(Pet.class));
     }
 
     @Test

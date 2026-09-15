@@ -7,6 +7,7 @@ import com.petadoption.entity.Pet;
 import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
 import com.petadoption.enums.AppointmentStatus;
+import com.petadoption.enums.PetStatus;
 import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.AppointmentMapper;
@@ -24,6 +25,7 @@ import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -39,7 +41,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final EmailService emailService;
     private final AuditLogService auditLogService;
 
+    private static final List<AppointmentStatus> ACTIVE_STATUSES =
+            List.of(AppointmentStatus.PENDING, AppointmentStatus.APPROVED);
+
     @Override
+    @Transactional
     public AppointmentResponseDto createAppointment(
             AppointmentRequestDto requestDto) {
 
@@ -55,6 +61,21 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Shelter not found"));
+
+        if (pet.getStatus() != PetStatus.AVAILABLE) {
+            throw new BusinessException(
+                    "Pet is not available for an appointment");
+        }
+
+        if (appointmentRepository
+                .existsByPetIdAndAppointmentDateTimeAndStatusIn(
+                        pet.getId(),
+                        requestDto.appointmentDateTime(),
+                        ACTIVE_STATUSES)) {
+
+            throw new BusinessException(
+                    "This pet already has an appointment at that time");
+        }
 
         String email =
                 SecurityUtil.getCurrentUserEmail();

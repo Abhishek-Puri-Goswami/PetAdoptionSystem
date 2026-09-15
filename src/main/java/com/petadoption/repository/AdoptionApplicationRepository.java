@@ -19,6 +19,8 @@ public interface AdoptionApplicationRepository
     boolean existsByPetIdAndAdopterIdAndStatusIn(
             Long petId, Long adopterId, List<ApplicationStatus> statuses);
 
+    boolean existsByPetId(Long petId);
+
     long countByStatus(ApplicationStatus status);
 
 }

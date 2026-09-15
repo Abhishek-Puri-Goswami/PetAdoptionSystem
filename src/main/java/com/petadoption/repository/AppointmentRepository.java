@@ -1,8 +1,10 @@
 package com.petadoption.repository;
 
 import com.petadoption.entity.Appointment;
+import com.petadoption.enums.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AppointmentRepository
@@ -11,4 +13,11 @@ public interface AppointmentRepository
     List<Appointment> findByAdopterId(Long adopterId);
 
     List<Appointment> findByShelterId(Long shelterId);
+
+    boolean existsByPetIdAndAppointmentDateTimeAndStatusIn(
+            Long petId,
+            LocalDateTime appointmentDateTime,
+            List<AppointmentStatus> statuses);
+
+    boolean existsByPetId(Long petId);
 }

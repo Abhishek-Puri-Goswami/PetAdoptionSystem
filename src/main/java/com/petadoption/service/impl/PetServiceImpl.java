@@ -3,8 +3,11 @@ package com.petadoption.service.impl;
 import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.PetMapper;
+import com.petadoption.repository.AdoptionApplicationRepository;
+import com.petadoption.repository.AppointmentRepository;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.PetService;
@@ -21,6 +24,8 @@ public class PetServiceImpl implements PetService {
     private final PetRepository petRepository;
     private final PetMapper petMapper;
     private final AuditLogService auditLogService;
+    private final AdoptionApplicationRepository adoptionApplicationRepository;
+    private final AppointmentRepository appointmentRepository;
 
     @Override
     public PetResponseDto createPet(PetRequestDto request) {
@@ -99,6 +104,15 @@ public class PetServiceImpl implements PetService {
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Pet not found"));
+
+        if (adoptionApplicationRepository.existsByPetId(id)
+                || appointmentRepository.existsByPetId(id)) {
+
+            throw new BusinessException(
+                    "Cannot delete a pet with existing adoption "
+                            + "applications or appointments; "
+                            + "mark it UNAVAILABLE instead");
+        }
 
         auditLogService.saveAuditLog(
                 "PET_DELETED",
