@@ -1,0 +1,1640 @@
+{
+  "v": 12,
+  "id": "cmtr1f9xk0ee3hh1ifmjw2n9j",
+  "name": "Pet Adoption System",
+  "folders": [
+    {
+      "v": 12,
+      "id": "cmtr1r3950gxyev1ip8laq73t",
+      "name": "00 - Public APIs",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Swagger",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/swagger-ui.html",
+          "responses": {},
+          "testScript": "",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtwjw60r05ewh01i0s70mma1"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "WhoAmI Test",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/test/me",
+          "responses": {},
+          "testScript": "",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtrknwun0ngxhh1il48uc9ec"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Home",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/",
+          "responses": {},
+          "testScript": "",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtr2ysyt0hnihh1iflzeqdyr"
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cmtr1rh730eewhh1ioenepkyz",
+      "name": "01 - Register / Login",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "auth": {
+            "authType": "none",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"firstName\": \"Nandini\",\n  \"lastName\": \"Goswami\",\n  \"email\": \"nandini@example.com\",\n  \"password\": \"Password@123\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Register Adopter",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/auth/register",
+          "responses": {},
+          "testScript": "pw.env.set(\"tokenAdopter\", pw.response.body.data.token);",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtr7rsoo0jpeev1ir2hz1fx3"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"email\": \"admin@petadoption.com\",\n  \"password\": \"Password@123\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Login System Admin",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/auth/login",
+          "responses": {},
+          "testScript": "pw.env.set(\"tokenSystemAdmin\", pw.response.body.data.token);",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtwjh8ii04bcd11igpdclxd5"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"email\": \"abhishek@petadoption.com\",\n  \"password\": \"Password@123\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Login Shelter Staff",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/auth/login",
+          "responses": {},
+          "testScript": "pw.env.set(\"tokenShelterStaff\", pw.response.body.data.token);",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtwpfa3y05ugd11ij95lex1p"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<token>>",
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"email\": \"anaya@petadoption.com\",\n  \"password\": \"Password@123\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Login Shelter Admin",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/auth/login",
+          "responses": {},
+          "testScript": "pw.env.set(\"tokenShelterAdmin\", pw.response.body.data.token);",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtr82ujs0it4hh1ipielxhls"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"email\": \"nandini@example.com\",\n  \"password\": \"Password@123\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Login Adopter",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/auth/login",
+          "responses": {},
+          "testScript": "pw.env.set(\"tokenAdopter\", pw.response.body.data.token);",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cmtwpvm68008oel1isfm9z3am"
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cmtwq1yov00b0di1iiklltz9q",
+      "name": "02 - System Admin",
+      "folders": [
+        {
+          "v": 12,
+          "id": "cmtwqfz0e00okel1ij0e88m9m",
+          "name": "00 - User Management",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All Users",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/users",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtwqhsmo00bqdi1i05o4bhxv"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get User By Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/users/1",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtwqj0e400cjdi1iib5lzp3b"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"roles\": [\n    // \"ROLE_ADOPTER\", \n    // \"ROLE_SHELTER_ADMIN\",\n    // \"ROLE_SHELTER_STAFF\",\n    \"ROLE_SYSTEM_ADMIN\"\n  ]\n}",
+                "contentType": "application/json"
+              },
+              "name": "Update Role By Id",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/users/<<userId>>/roles",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "userId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmtwqkk5200ooel1ic408tvw8"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Enable User",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/users/<<userId>>/enable",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "userId",
+                  "value": "4",
+                  "active": true
+                }
+              ],
+              "id": "cmtwqkn6d00cpdi1igae3f9mm"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Disable User",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/users/<<userId>>/disable",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "userId",
+                  "value": "4",
+                  "active": true
+                }
+              ],
+              "id": "cmtwrdcrf00ucel1iqwevz13o"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmtwqg8pc00bldi1iaedoma7b",
+          "name": "01 - Shelter Management",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"name\": \"PetConnect Rescue Center\",\n  \"email\": \"info@petconnect.org\",\n  \"phone\": \"+91-9876543210\",\n  \"addressLine1\": \"45 MG Road\",\n  \"addressLine2\": \"Opposite Metro Station\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"description\": \"Provides pet rescue, medical care, foster support, and adoption services for homeless animals.\"\n}\n",
+                "contentType": "application/json"
+              },
+              "name": "Create Shelter",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/shelters",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtws7ina0120el1ioi8m55bg"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"name\": \"PetConnect Rescue Center\",\n  \"email\": \"info@petconnect.org\",\n  \"phone\": \"+91-9876543210\",\n  \"addressLine1\": \"45 MG Road\",\n  \"addressLine2\": \"Opposite Metro Station\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"description\": \"Provides pet rescue, medical care, foster support, and adoption services for homeless animals.\"\n}\n",
+                "contentType": "application/json"
+              },
+              "name": "Update Shelter",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/shelters/<<shelterId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "shelterId",
+                  "value": "3",
+                  "active": true
+                }
+              ],
+              "id": "cmtwsjd1l012bel1i8jiygtzi"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Delete Shelter by Id",
+              "method": "DELETE",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/shelters/<<shelterId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "shelterId",
+                  "value": "5",
+                  "active": true
+                }
+              ],
+              "id": "cmtwsr8zf014lel1i045f0okw"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmtwqgf8j00omel1ia3h2n2ep",
+          "name": "02 - Reports",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Report",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/reports/dashboard",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtwt0r3f016udi1isauj17je"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmtwqgm4p00bmdi1i9xkjlkos",
+          "name": "03 - Audit Logs",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Audit Logs",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/audit-logs",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtwt2oux016vdi1ioitwe195"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmtwqgvaq00bodi1i7hgm0792",
+          "name": "04 - System Wide Applications",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Adoption Applications",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtwt74jn015fel1ivnxerneu"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Adoption Application by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions/<<applicationId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "applicationId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmtwt8bp90170di1incb8gw80"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmtwqh1gy00bpdi1iz72jq7h7",
+          "name": "05 - System Wide Appointments",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Appointments",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtwtes2a0178di1i0xmv4gew"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Appointment By Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/<<appointmentId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "appointmentId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmtwtktxt017kdi1i1mhzqqmg"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        }
+      ],
+      "requests": [],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cmtwqddto00oiel1igel1ttia",
+      "name": "03 - Shelter Admin",
+      "folders": [
+        {
+          "v": 12,
+          "id": "cmtwvmq3101kcdi1i8wxc3qdp",
+          "name": "00 - Pet Management",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"name\": \"Charlie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\"\n}",
+                "contentType": "application/json"
+              },
+              "name": "Create Pet",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1i70rj1cg6di1ihjlltiye"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"name\": \"Roodie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\"\n}",
+                "contentType": "application/json"
+              },
+              "name": "Edit Pet by Id",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "6",
+                  "active": true
+                }
+              ],
+              "id": "cmu1i9k3c1cgadi1irfeypm2d"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Delete Pet by Id",
+              "method": "DELETE",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "6",
+                  "active": true
+                }
+              ],
+              "id": "cmu1i9xc81cgbdi1igsan7jbp"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": [
+                  {
+                    "key": "file",
+                    "value": "",
+                    "active": true,
+                    "isFile": true
+                  }
+                ],
+                "contentType": "multipart/form-data"
+              },
+              "name": "Upload Pet Image",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>/image",
+              "responses": {},
+              "testScript": "",
+              "description": "Uploads (or replaces) the pet's photo via Cloudinary. Select a file for the 'file' form field before sending.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "6",
+                  "active": true
+                }
+              ],
+              "id": "cv2img01pload0pet0image0req"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmtwvto2p01mddi1i4uum4zdy",
+          "name": "01 - Adoption Management",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All Adoption Applications",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1il74p1cgkdi1idy4pt5jc"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Adoption Application by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions/<<adoptionId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "adoptionId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1ilkjg1cgmdi1i0q8eyjju"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Approve Adoption Application by Id",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions/<<adoptionId>>/approve",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "adoptionId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1im0kl1cgndi1ihv18ki5x"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Reject Adoption Application by Id",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions/<<adoptionId>>/reject",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "adoptionId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1im7zw1cgodi1i3dkmdn0b"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmtwvtvqn01medi1ij8bwtqml",
+          "name": "02 - Appointment Management",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All Appointments",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1itkgv1cgudi1i44n3uydn"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Appointment by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/<<appointmentId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "appointmentId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1iu9ts1cgwdi1ip58vi6rk"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Approve Appointment by Id",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/<<appointmentId>>/approve",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "appointmentId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1ivszh0mysel1ibhc6pyix"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Reject Appointment by Id",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/<<appointmentId>>/reject",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "appointmentId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1ixsck0myvel1iwyaut2w5"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Complete Appointment by Id",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/<<appointmentId>>/complete",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "appointmentId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1ixwuf1cgydi1i0tiqps8a"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        }
+      ],
+      "requests": [],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cmtwqdogg00bedi1i9qv141po",
+      "name": "04 - Shelter Staff",
+      "folders": [
+        {
+          "v": 12,
+          "id": "cmu1j0dfl0myxel1idcjhz9df",
+          "name": "00 - Pet Operations",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterStaff>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All Pets",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1j0whx0mz0el1i6h382qir"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterStaff>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Pet by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petid>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petid",
+                  "value": "5",
+                  "active": true
+                }
+              ],
+              "id": "cmu1j2nj10mz7el1ic7vqnbev"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmu1j0jth1ch1di1igj3x4pij",
+          "name": "01 - Appointment Operations",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterStaff>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All Appointments",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1j8qu81ch7di1imp0shp9h"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterStaff>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Appointment by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/<<appointmentId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "appointmentId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cmu1j955y1ch8di1ikuaopopa"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        }
+      ],
+      "requests": [],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cmtwqdzxq00ojel1i8orj69i2",
+      "name": "05 - Adopter",
+      "folders": [
+        {
+          "v": 12,
+          "id": "cmu1jhxru0mzjel1iu7oastag",
+          "name": "00 - Browse Pets",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All Pets",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1jllyd1cj7di1i1rlutyxu"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Pet by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petid>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petid",
+                  "value": "5",
+                  "active": true
+                }
+              ],
+              "id": "cmu1jluxl1cj8di1ip8pd8v56"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmu1ji0qy1cj2di1ibl5bwc6s",
+          "name": "01 - Browse Shelters",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Shelter by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/shelters/<<shelterId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "shelterId",
+                  "value": "3",
+                  "active": true
+                }
+              ],
+              "id": "cmtwspcjj016gdi1i9gc56bic"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All Shelters",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/shelters",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmtwsxfnc016pdi1ifzjqszoi"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmu1jn72s1cjbdi1i290ulic9",
+          "name": "02 - Adoption Applications",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"petId\": 3,\n  \"adopterId\": 4,\n  \"applicantNotes\": \"I previously owned a Golden Retriever for 10 years and am fully prepared for veterinary and grooming responsibilities.\"\n}",
+                "contentType": "application/json"
+              },
+              "name": "Create Adoption Application",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1jqct81cjedi1isiw616mw"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All My Adoption Applications",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions/my",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1jtryx1cjgdi1iq8jry1uz"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get My Adoption Application by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/adoptions/my/<<adoptionId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "adoptionId",
+                  "value": "2",
+                  "active": true
+                }
+              ],
+              "id": "cmu1jttyt1cjhdi1ihw0ebx9m"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cmu1jndde1cjcdi1i5o7ub5sv",
+          "name": "03 - Appointments",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"petId\": 5,\n  \"shelterId\": 1,\n  \"appointmentDateTime\": \"2026-09-21T14:30:00\",\n  \"notes\": \"Would like to interact with the pet and discuss its medical history.\"\n}",
+                "contentType": "application/json"
+              },
+              "name": "Create Appointment ",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1jz2vf1cjndi1iq0lb5mbn"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get All My Appointments",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/my",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cmu1k2z7c1ck2di1ii3obesj4"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get My Appointment by Id",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/appointments/my/<<appointmentId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "appointmentId",
+                  "value": "2",
+                  "active": true
+                }
+              ],
+              "id": "cmu1k31hn1ck3di1igpiob1k4"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
+        }
+      ],
+      "requests": [],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    }
+  ],
+  "requests": [],
+  "auth": {
+    "authType": "inherit",
+    "authActive": true
+  },
+  "headers": [],
+  "variables": [],
+  "description": null,
+  "preRequestScript": "",
+  "testScript": ""
+}
