@@ -507,6 +507,42 @@
                 }
               ],
               "id": "cmtwsr8zf014lel1i045f0okw"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": [
+                  {
+                    "key": "file",
+                    "value": "",
+                    "active": true,
+                    "isFile": true
+                  }
+                ],
+                "contentType": "multipart/form-data"
+              },
+              "name": "Upload Shelter Image",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/shelters/<<shelterId>>/image",
+              "responses": {},
+              "testScript": "",
+              "description": "Uploads (or replaces) the shelter's photo via Cloudinary. Select a file for the 'file' form field before sending.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "shelterId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cv3uploadshelterimage0req1"
             }
           ],
           "auth": {

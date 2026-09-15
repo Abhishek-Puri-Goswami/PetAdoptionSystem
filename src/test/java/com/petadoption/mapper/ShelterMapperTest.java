@@ -89,6 +89,7 @@ class ShelterMapperTest {
         shelter.setState("Karnataka");
         shelter.setCountry("India");
         shelter.setDescription("Animal shelter");
+        shelter.setImageUrl("https://cdn.example.com/shelter.jpg");
 
         ShelterResponseDto dto =
                 mapper.toResponseDto(
@@ -135,6 +136,11 @@ class ShelterMapperTest {
         assertEquals(
                 "Animal shelter",
                 dto.description()
+        );
+
+        assertEquals(
+                "https://cdn.example.com/shelter.jpg",
+                dto.imageUrl()
         );
     }
 }

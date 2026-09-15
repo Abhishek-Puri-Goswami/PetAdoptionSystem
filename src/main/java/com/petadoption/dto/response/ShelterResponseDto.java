@@ -16,6 +16,8 @@ public record ShelterResponseDto(
 
         String country,
 
-        String description
+        String description,
+
+        String imageUrl
 ) {
 }

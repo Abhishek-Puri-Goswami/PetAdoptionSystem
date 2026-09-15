@@ -3,14 +3,18 @@ package com.petadoption.service.impl;
 import com.petadoption.dto.request.ShelterRequestDto;
 import com.petadoption.dto.response.ShelterResponseDto;
 import com.petadoption.entity.Shelter;
+import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.ShelterMapper;
 import com.petadoption.repository.ShelterRepository;
 import com.petadoption.service.AuditLogService;
+import com.petadoption.service.ImageStorageService;
 import com.petadoption.service.ShelterService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,9 +23,13 @@ import java.util.List;
 public class ShelterServiceImpl
         implements ShelterService {
 
+    private static final String SHELTER_IMAGE_FOLDER =
+            "pet-adoption/shelters";
+
     private final ShelterRepository shelterRepository;
     private final ShelterMapper shelterMapper;
     private final AuditLogService auditLogService;
+    private final ImageStorageService imageStorageService;
 
     @Override
     public ShelterResponseDto createShelter(
@@ -105,6 +113,10 @@ public class ShelterServiceImpl
                                 new ResourceNotFoundException(
                                         "Shelter not found"));
 
+        if (StringUtils.hasText(shelter.getImagePublicId())) {
+            imageStorageService.deleteImage(shelter.getImagePublicId());
+        }
+
         auditLogService.saveAuditLog(
                 "SHELTER_DELETED",
                 "Shelter",
@@ -113,5 +125,51 @@ public class ShelterServiceImpl
                 "Shelter deleted");
 
         shelterRepository.delete(shelter);
+    }
+
+    @Override
+    public ShelterResponseDto uploadShelterImage(
+            Long id, MultipartFile file) {
+
+        Shelter shelter =
+                shelterRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Shelter not found"));
+
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("Image file is required");
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BusinessException(
+                    "Only image files are allowed");
+        }
+
+        String oldPublicId = shelter.getImagePublicId();
+
+        ImageStorageService.ImageUploadResult result =
+                imageStorageService.uploadImage(
+                        file, SHELTER_IMAGE_FOLDER);
+
+        shelter.setImageUrl(result.url());
+        shelter.setImagePublicId(result.publicId());
+
+        Shelter updated = shelterRepository.save(shelter);
+
+        if (StringUtils.hasText(oldPublicId)) {
+            imageStorageService.deleteImage(oldPublicId);
+        }
+
+        auditLogService.saveAuditLog(
+                "SHELTER_IMAGE_UPDATED",
+                "Shelter",
+                String.valueOf(updated.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                "Shelter image uploaded/replaced");
+
+        return shelterMapper.toResponseDto(updated);
     }
 }

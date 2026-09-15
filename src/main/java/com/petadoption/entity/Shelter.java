@@ -41,6 +41,10 @@ public class Shelter extends BaseEntity {
     @Column(length = 2000)
     private String description;
 
+    private String imageUrl;
+
+    private String imagePublicId;
+
     @OneToMany(mappedBy = "shelter")
     private List<Pet> pets = new ArrayList<>();
 

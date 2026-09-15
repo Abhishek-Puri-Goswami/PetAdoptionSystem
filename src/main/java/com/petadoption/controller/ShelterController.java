@@ -8,8 +8,10 @@ import com.petadoption.service.ShelterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -81,6 +83,21 @@ public class ShelterController {
                 true,
                 "Shelter deleted successfully",
                 null
+        );
+    }
+
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PostMapping(
+            value = "/{id}/image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponseDto<ShelterResponseDto> uploadShelterImage(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Shelter image uploaded successfully",
+                shelterService.uploadShelterImage(id, file)
         );
     }
 }

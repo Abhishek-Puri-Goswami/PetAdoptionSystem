@@ -3,10 +3,12 @@ package com.petadoption.service.impl;
 import com.petadoption.dto.request.ShelterRequestDto;
 import com.petadoption.dto.response.ShelterResponseDto;
 import com.petadoption.entity.Shelter;
+import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.ShelterMapper;
 import com.petadoption.repository.ShelterRepository;
 import com.petadoption.service.AuditLogService;
+import com.petadoption.service.ImageStorageService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +38,9 @@ class ShelterServiceImplTest {
 
     @Mock
     private AuditLogService auditLogService;
+
+    @Mock
+    private ImageStorageService imageStorageService;
 
     @InjectMocks
     private ShelterServiceImpl shelterService;
@@ -74,7 +81,8 @@ class ShelterServiceImplTest {
                         "Bangalore",
                         "Karnataka",
                         "India",
-                        "Animal Shelter"
+                        "Animal Shelter",
+                        null
                 );
     }
 
@@ -230,6 +238,9 @@ class ShelterServiceImplTest {
         verify(shelterRepository)
                 .delete(shelter);
 
+        verify(imageStorageService, never())
+                .deleteImage(anyString());
+
         verify(auditLogService)
                 .saveAuditLog(
                         anyString(),
@@ -238,6 +249,25 @@ class ShelterServiceImplTest {
                         anyString(),
                         anyString()
                 );
+    }
+
+    @Test
+    void shouldDeleteCloudinaryImageWhenDeletingShelterWithImage() {
+
+        shelter.setImagePublicId("pet-adoption/shelters/abc123");
+
+        when(shelterRepository.findById(1L))
+                .thenReturn(
+                        Optional.of(shelter)
+                );
+
+        shelterService.deleteShelter(1L);
+
+        verify(imageStorageService)
+                .deleteImage("pet-adoption/shelters/abc123");
+
+        verify(shelterRepository)
+                .delete(shelter);
     }
 
     @Test
@@ -254,5 +284,131 @@ class ShelterServiceImplTest {
                         1L
                 )
         );
+    }
+
+    @Test
+    void shouldUploadShelterImage() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "shelter.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(shelterRepository.findById(1L))
+                .thenReturn(Optional.of(shelter));
+
+        when(imageStorageService.uploadImage(
+                file, "pet-adoption/shelters"))
+                .thenReturn(new ImageStorageService.ImageUploadResult(
+                        "https://cdn.example.com/shelter.jpg",
+                        "pet-adoption/shelters/xyz789"));
+
+        when(shelterRepository.save(any(Shelter.class)))
+                .thenReturn(shelter);
+
+        when(shelterMapper.toResponseDto(shelter))
+                .thenReturn(responseDto);
+
+        ShelterResponseDto result =
+                shelterService.uploadShelterImage(1L, file);
+
+        assertNotNull(result);
+
+        assertEquals(
+                "https://cdn.example.com/shelter.jpg",
+                shelter.getImageUrl());
+
+        verify(imageStorageService, never())
+                .deleteImage(anyString());
+    }
+
+    @Test
+    void shouldDeleteOldImageWhenReplacingShelterImage() {
+
+        shelter.setImageUrl("https://cdn.example.com/old.jpg");
+        shelter.setImagePublicId("pet-adoption/shelters/old123");
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "new.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(shelterRepository.findById(1L))
+                .thenReturn(Optional.of(shelter));
+
+        when(imageStorageService.uploadImage(
+                file, "pet-adoption/shelters"))
+                .thenReturn(new ImageStorageService.ImageUploadResult(
+                        "https://cdn.example.com/new.jpg",
+                        "pet-adoption/shelters/new456"));
+
+        when(shelterRepository.save(any(Shelter.class)))
+                .thenReturn(shelter);
+
+        when(shelterMapper.toResponseDto(shelter))
+                .thenReturn(responseDto);
+
+        shelterService.uploadShelterImage(1L, file);
+
+        verify(imageStorageService)
+                .deleteImage("pet-adoption/shelters/old123");
+    }
+
+    @Test
+    void shouldThrowWhenUploadingEmptyShelterImage() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "empty.jpg",
+                        "image/jpeg",
+                        new byte[0]);
+
+        when(shelterRepository.findById(1L))
+                .thenReturn(Optional.of(shelter));
+
+        assertThrows(
+                BusinessException.class,
+                () -> shelterService.uploadShelterImage(1L, file));
+    }
+
+    @Test
+    void shouldThrowWhenUploadingNonImageShelterFile() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "doc.pdf",
+                        "application/pdf",
+                        "not-an-image".getBytes());
+
+        when(shelterRepository.findById(1L))
+                .thenReturn(Optional.of(shelter));
+
+        assertThrows(
+                BusinessException.class,
+                () -> shelterService.uploadShelterImage(1L, file));
+    }
+
+    @Test
+    void shouldThrowWhenUploadingImageForMissingShelter() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "shelter.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(shelterRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> shelterService.uploadShelterImage(1L, file));
     }
 }
