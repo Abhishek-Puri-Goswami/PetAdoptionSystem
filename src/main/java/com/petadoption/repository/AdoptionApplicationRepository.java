@@ -13,6 +13,12 @@ public interface AdoptionApplicationRepository
 
     List<AdoptionApplication> findByPetId(Long petId);
 
+    List<AdoptionApplication> findByPetIdAndStatusIn(
+            Long petId, List<ApplicationStatus> statuses);
+
+    boolean existsByPetIdAndAdopterIdAndStatusIn(
+            Long petId, Long adopterId, List<ApplicationStatus> statuses);
+
     long countByStatus(ApplicationStatus status);
 
 }

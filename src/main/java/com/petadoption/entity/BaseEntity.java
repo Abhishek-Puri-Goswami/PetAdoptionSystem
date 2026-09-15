@@ -3,6 +3,7 @@ package com.petadoption.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,6 +17,10 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version = 0L;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

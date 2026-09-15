@@ -21,6 +21,7 @@ import com.petadoption.service.AuditLogService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,7 +36,13 @@ public class AdoptionServiceImpl implements AdoptionService {
     private final EmailService emailService;
     private final AuditLogService auditLogService;
 
+    private static final List<ApplicationStatus> ACTIVE_STATUSES =
+            List.of(ApplicationStatus.PENDING,
+                    ApplicationStatus.UNDER_REVIEW,
+                    ApplicationStatus.APPROVED);
+
     @Override
+    @Transactional
     public AdoptionResponseDto createApplication(
             AdoptionRequestDto request) {
 
@@ -54,6 +61,13 @@ public class AdoptionServiceImpl implements AdoptionService {
         if (pet.getStatus() == PetStatus.ADOPTED) {
             throw new BusinessException(
                     "Pet has already been adopted");
+        }
+
+        if (adoptionRepository.existsByPetIdAndAdopterIdAndStatusIn(
+                pet.getId(), adopter.getId(), ACTIVE_STATUSES)) {
+
+            throw new BusinessException(
+                    "You already have an active application for this pet");
         }
 
         AdoptionApplication application =
@@ -147,6 +161,7 @@ public class AdoptionServiceImpl implements AdoptionService {
     }
 
     @Override
+    @Transactional
     public AdoptionResponseDto approveApplication(Long id) {
 
         AdoptionApplication application =
@@ -155,15 +170,49 @@ public class AdoptionServiceImpl implements AdoptionService {
                                 new ResourceNotFoundException(
                                         "Application not found"));
 
-        application.setStatus(ApplicationStatus.APPROVED);
-
         Pet pet = application.getPet();
+
+        if (pet.getStatus() == PetStatus.ADOPTED) {
+            throw new BusinessException(
+                    "Pet has already been adopted");
+        }
+
+        application.setStatus(ApplicationStatus.APPROVED);
         pet.setStatus(PetStatus.ADOPTED);
 
         petRepository.save(pet);
 
         AdoptionApplication updated =
                 adoptionRepository.save(application);
+
+        List<AdoptionApplication> otherPendingApplications =
+                adoptionRepository.findByPetIdAndStatusIn(
+                                pet.getId(),
+                                List.of(ApplicationStatus.PENDING,
+                                        ApplicationStatus.UNDER_REVIEW))
+                        .stream()
+                        .filter(other -> !other.getId().equals(updated.getId()))
+                        .toList();
+
+        for (AdoptionApplication other : otherPendingApplications) {
+
+            other.setStatus(ApplicationStatus.REJECTED);
+            adoptionRepository.save(other);
+
+            auditLogService.saveAuditLog(
+                    "ADOPTION_APPLICATION_REJECTED",
+                    "AdoptionApplication",
+                    String.valueOf(other.getId()),
+                    SecurityUtil.getCurrentUserEmail(),
+                    "Auto-rejected: pet was adopted via another application");
+
+            emailService.sendEmail(
+                    other.getAdopter().getEmail(),
+                    NotificationConstants.ADOPTION_REJECTED_SUBJECT,
+                    EmailTemplateBuilder.adoptionRejected(
+                            other.getAdopter().getFirstName())
+            );
+        }
 
         auditLogService.saveAuditLog(
                 "ADOPTION_APPLICATION_APPROVED",
