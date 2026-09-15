@@ -18,6 +18,8 @@ public record PetResponseDto(
 
         String description,
 
-        PetStatus status
+        PetStatus status,
+
+        String imageUrl
 ) {
 }

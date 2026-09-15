@@ -11,6 +11,7 @@ import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.AppointmentRepository;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.service.AuditLogService;
+import com.petadoption.service.ImageStorageService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +47,9 @@ class PetServiceImplTest {
 
     @Mock
     private AppointmentRepository appointmentRepository;
+
+    @Mock
+    private ImageStorageService imageStorageService;
 
     @InjectMocks
     private PetServiceImpl petService;
@@ -85,7 +91,8 @@ class PetServiceImplTest {
                         2,
                         "Male",
                         "Friendly dog",
-                        PetStatus.AVAILABLE
+                        PetStatus.AVAILABLE,
+                        null
                 );
     }
 
@@ -259,6 +266,9 @@ class PetServiceImplTest {
         verify(petRepository)
                 .delete(pet);
 
+        verify(imageStorageService, never())
+                .deleteImage(anyString());
+
         verify(auditLogService)
                 .saveAuditLog(
                         anyString(),
@@ -267,6 +277,165 @@ class PetServiceImplTest {
                         anyString(),
                         anyString()
                 );
+    }
+
+    @Test
+    void shouldDeleteCloudinaryImageWhenDeletingPetWithImage() {
+
+        pet.setImagePublicId("pet-adoption/pets/abc123");
+
+        when(petRepository.findById(1L))
+                .thenReturn(
+                        Optional.of(pet)
+                );
+
+        when(adoptionApplicationRepository.existsByPetId(1L))
+                .thenReturn(false);
+
+        when(appointmentRepository.existsByPetId(1L))
+                .thenReturn(false);
+
+        petService.deletePet(1L);
+
+        verify(imageStorageService)
+                .deleteImage("pet-adoption/pets/abc123");
+
+        verify(petRepository)
+                .delete(pet);
+    }
+
+    @Test
+    void shouldUploadPetImage() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "buddy.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        when(imageStorageService.uploadImage(file, "pet-adoption/pets"))
+                .thenReturn(new ImageStorageService.ImageUploadResult(
+                        "https://cdn.example.com/buddy.jpg",
+                        "pet-adoption/pets/xyz789"));
+
+        when(petRepository.save(any(Pet.class)))
+                .thenReturn(pet);
+
+        when(petMapper.toResponseDto(pet))
+                .thenReturn(responseDto);
+
+        PetResponseDto result =
+                petService.uploadPetImage(1L, file);
+
+        assertNotNull(result);
+
+        assertEquals(
+                "https://cdn.example.com/buddy.jpg",
+                pet.getImageUrl());
+
+        assertEquals(
+                "pet-adoption/pets/xyz789",
+                pet.getImagePublicId());
+
+        verify(imageStorageService, never())
+                .deleteImage(anyString());
+    }
+
+    @Test
+    void shouldDeleteOldImageWhenReplacingPetImage() {
+
+        pet.setImageUrl("https://cdn.example.com/old.jpg");
+        pet.setImagePublicId("pet-adoption/pets/old123");
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "new.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        when(imageStorageService.uploadImage(file, "pet-adoption/pets"))
+                .thenReturn(new ImageStorageService.ImageUploadResult(
+                        "https://cdn.example.com/new.jpg",
+                        "pet-adoption/pets/new456"));
+
+        when(petRepository.save(any(Pet.class)))
+                .thenReturn(pet);
+
+        when(petMapper.toResponseDto(pet))
+                .thenReturn(responseDto);
+
+        petService.uploadPetImage(1L, file);
+
+        verify(imageStorageService)
+                .deleteImage("pet-adoption/pets/old123");
+    }
+
+    @Test
+    void shouldThrowWhenUploadingEmptyImage() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "empty.jpg",
+                        "image/jpeg",
+                        new byte[0]);
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        assertThrows(
+                BusinessException.class,
+                () -> petService.uploadPetImage(1L, file));
+
+        verify(imageStorageService, never())
+                .uploadImage(any(), anyString());
+    }
+
+    @Test
+    void shouldThrowWhenUploadingNonImageFile() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "doc.pdf",
+                        "application/pdf",
+                        "not-an-image".getBytes());
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        assertThrows(
+                BusinessException.class,
+                () -> petService.uploadPetImage(1L, file));
+
+        verify(imageStorageService, never())
+                .uploadImage(any(), anyString());
+    }
+
+    @Test
+    void shouldThrowWhenUploadingImageForMissingPet() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "buddy.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> petService.uploadPetImage(1L, file));
     }
 
     @Test

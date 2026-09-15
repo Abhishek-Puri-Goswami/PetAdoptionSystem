@@ -34,6 +34,10 @@ public class Pet extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PetStatus status = PetStatus.AVAILABLE;
 
+    private String imageUrl;
+
+    private String imagePublicId;
+
     @ManyToOne
     @JoinColumn(name = "shelter_id")
     private Shelter shelter;

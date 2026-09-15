@@ -80,6 +80,7 @@ class PetMapperTest {
         pet.setGender("Male");
         pet.setDescription("Friendly dog");
         pet.setStatus(PetStatus.AVAILABLE);
+        pet.setImageUrl("https://cdn.example.com/buddy.jpg");
 
         PetResponseDto dto =
                 mapper.toResponseDto(pet);
@@ -124,6 +125,11 @@ class PetMapperTest {
         assertEquals(
                 PetStatus.AVAILABLE,
                 dto.status()
+        );
+
+        assertEquals(
+                "https://cdn.example.com/buddy.jpg",
+                dto.imageUrl()
         );
     }
 }
