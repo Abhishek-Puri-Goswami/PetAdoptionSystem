@@ -34,29 +34,6 @@
         {
           "v": "17",
           "auth": {
-            "token": "<<tokenAdopter>>",
-            "authType": "bearer",
-            "authActive": true
-          },
-          "body": {
-            "body": null,
-            "contentType": null
-          },
-          "name": "WhoAmI Test",
-          "method": "GET",
-          "params": [],
-          "headers": [],
-          "endpoint": "<<baseUrl>>/api/test/me",
-          "responses": {},
-          "testScript": "",
-          "description": null,
-          "preRequestScript": "",
-          "requestVariables": [],
-          "id": "cmtrknwun0ngxhh1il48uc9ec"
-        },
-        {
-          "v": "17",
-          "auth": {
             "authType": "inherit",
             "authActive": true
           },
@@ -203,6 +180,69 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cmtwpvm68008oel1isfm9z3am"
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cv1myprofile01folder0anyro",
+      "name": "01a - My Profile (Any Role)",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Get My Profile",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/users/me",
+          "responses": {},
+          "testScript": "",
+          "description": "Works for any authenticated role, not just adopters - swap the token to test as shelter admin/staff/system admin.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv1getmyprofile0req0001abc"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"firstName\": \"Nandini\",\n  \"lastName\": \"Goswami\",\n  \"phone\": \"9876543210\",\n  \"addressLine1\": \"12 MG Road\",\n  \"addressLine2\": null,\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Update My Profile",
+          "method": "PUT",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/users/me",
+          "responses": {},
+          "testScript": "",
+          "description": null,
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv1updatemyprofile0req002d"
         }
       ],
       "auth": {

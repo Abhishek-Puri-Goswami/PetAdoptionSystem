@@ -1,5 +1,6 @@
 package com.petadoption.service;
 
+import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.UserResponseDto;
 
@@ -18,4 +19,8 @@ public interface UserService {
     UserResponseDto disableUser(Long id);
 
     UserResponseDto enableUser(Long id);
+
+    UserResponseDto getMyProfile();
+
+    UserResponseDto updateMyProfile(UpdateProfileRequestDto request);
 }

@@ -1,20 +1,14 @@
-package com.petadoption.dto.response;
+package com.petadoption.dto.request;
 
-import java.util.Set;
+import jakarta.validation.constraints.NotBlank;
 
-public record UserResponseDto(
+public record UpdateProfileRequestDto(
 
-        Long id,
-
+        @NotBlank
         String firstName,
 
+        @NotBlank
         String lastName,
-
-        String email,
-
-        boolean enabled,
-
-        Set<String> roles,
 
         String phone,
 

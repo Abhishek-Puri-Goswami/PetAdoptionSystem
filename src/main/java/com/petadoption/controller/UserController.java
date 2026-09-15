@@ -1,5 +1,6 @@
 package com.petadoption.controller;
 
+import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.ApiResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
@@ -20,6 +21,27 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public ApiResponseDto<UserResponseDto> getMyProfile() {
+
+        return new ApiResponseDto<>(
+                true,
+                "Profile fetched successfully",
+                userService.getMyProfile());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/me")
+    public ApiResponseDto<UserResponseDto> updateMyProfile(
+            @Valid @RequestBody UpdateProfileRequestDto request) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Profile updated successfully",
+                userService.updateMyProfile(request));
+    }
 
     @GetMapping
     public ApiResponseDto<List<UserResponseDto>> getAllUsers() {

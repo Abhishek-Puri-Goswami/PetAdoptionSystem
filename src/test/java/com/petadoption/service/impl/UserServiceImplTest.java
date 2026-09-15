@@ -1,5 +1,6 @@
 package com.petadoption.service.impl;
 
+import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.entity.Role;
@@ -10,12 +11,15 @@ import com.petadoption.mapper.UserMapper;
 import com.petadoption.repository.RoleRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
+import com.petadoption.util.SecurityUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
@@ -60,7 +64,8 @@ class UserServiceImplTest {
                         "Goswami",
                         "test@test.com",
                         true,
-                        Set.of("ROLE_ADOPTER"));
+                        Set.of("ROLE_ADOPTER"),
+                        null, null, null, null, null, null, null);
 
         when(userRepository.findAll())
                 .thenReturn(List.of(user));
@@ -88,7 +93,8 @@ class UserServiceImplTest {
                         "Goswami",
                         "test@test.com",
                         true,
-                        Set.of("ROLE_ADOPTER"));
+                        Set.of("ROLE_ADOPTER"),
+                        null, null, null, null, null, null, null);
 
         when(userRepository.findById(1L))
                 .thenReturn(Optional.of(user));
@@ -136,7 +142,8 @@ class UserServiceImplTest {
                                 "Goswami",
                                 "test@test.com",
                                 false,
-                                Set.of("ROLE_ADOPTER")));
+                                Set.of("ROLE_ADOPTER"),
+                                null, null, null, null, null, null, null));
 
         userService.disableUser(1L);
 
@@ -173,7 +180,8 @@ class UserServiceImplTest {
                                 "Goswami",
                                 "test@test.com",
                                 true,
-                                Set.of("ROLE_ADOPTER")));
+                                Set.of("ROLE_ADOPTER"),
+                                null, null, null, null, null, null, null));
 
         userService.enableUser(1L);
 
@@ -220,7 +228,8 @@ class UserServiceImplTest {
                                 "Goswami",
                                 "test@test.com",
                                 true,
-                                Set.of("ROLE_SYSTEM_ADMIN")));
+                                Set.of("ROLE_SYSTEM_ADMIN"),
+                                null, null, null, null, null, null, null));
 
         UserResponseDto result =
                 userService.updateRoles(
@@ -237,5 +246,128 @@ class UserServiceImplTest {
                         any(),
                         any(),
                         any());
+    }
+
+    @Test
+    void shouldGetMyProfile() {
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+
+        UserResponseDto response =
+                new UserResponseDto(
+                        1L,
+                        "Abhishek",
+                        "Goswami",
+                        "test@test.com",
+                        true,
+                        Set.of("ROLE_ADOPTER"),
+                        null, null, null, null, null, null, null);
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("test@test.com");
+
+            when(userRepository.findByEmail("test@test.com"))
+                    .thenReturn(Optional.of(user));
+
+            when(userMapper.toResponseDto(user))
+                    .thenReturn(response);
+
+            UserResponseDto result =
+                    userService.getMyProfile();
+
+            assertThat(result)
+                    .isEqualTo(response);
+        }
+    }
+
+    @Test
+    void shouldUpdateMyProfile() {
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+
+        UpdateProfileRequestDto request =
+                new UpdateProfileRequestDto(
+                        "Abhishek",
+                        "Goswami",
+                        "9876543210",
+                        "12 MG Road",
+                        null,
+                        "Bangalore",
+                        "Karnataka",
+                        "560001",
+                        "India");
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("test@test.com");
+
+            when(userRepository.findByEmail("test@test.com"))
+                    .thenReturn(Optional.of(user));
+
+            when(userRepository.save(any(User.class)))
+                    .thenReturn(user);
+
+            when(userMapper.toResponseDto(user))
+                    .thenReturn(
+                            new UserResponseDto(
+                                    1L,
+                                    "Abhishek",
+                                    "Goswami",
+                                    "test@test.com",
+                                    true,
+                                    Set.of("ROLE_ADOPTER"),
+                                    "9876543210",
+                                    "12 MG Road",
+                                    null,
+                                    "Bangalore",
+                                    "Karnataka",
+                                    "560001",
+                                    "India"));
+
+            UserResponseDto result =
+                    userService.updateMyProfile(request);
+
+            assertThat(user.getPhone())
+                    .isEqualTo("9876543210");
+
+            assertThat(result.city())
+                    .isEqualTo("Bangalore");
+
+            verify(auditLogService)
+                    .saveAuditLog(
+                            eq("USER_PROFILE_UPDATED"),
+                            any(),
+                            any(),
+                            any(),
+                            any());
+        }
+    }
+
+    @Test
+    void shouldThrowWhenGettingMyProfileAndUserMissing() {
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("ghost@test.com");
+
+            when(userRepository.findByEmail("ghost@test.com"))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() ->
+                    userService.getMyProfile())
+                    .isInstanceOf(
+                            ResourceNotFoundException.class);
+        }
     }
 }

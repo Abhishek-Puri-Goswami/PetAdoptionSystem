@@ -1,5 +1,6 @@
 package com.petadoption.service.impl;
 
+import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.entity.Role;
@@ -130,5 +131,50 @@ public class UserServiceImpl implements UserService {
                 "User enabled");
 
         return userMapper.toResponseDto(updated);
+    }
+
+    @Override
+    public UserResponseDto getMyProfile() {
+
+        User user = currentUser();
+
+        return userMapper.toResponseDto(user);
+    }
+
+    @Override
+    public UserResponseDto updateMyProfile(
+            UpdateProfileRequestDto request) {
+
+        User user = currentUser();
+
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setPhone(request.phone());
+        user.setAddressLine1(request.addressLine1());
+        user.setAddressLine2(request.addressLine2());
+        user.setCity(request.city());
+        user.setState(request.state());
+        user.setPostalCode(request.postalCode());
+        user.setCountry(request.country());
+
+        User updated = userRepository.save(user);
+
+        auditLogService.saveAuditLog(
+                "USER_PROFILE_UPDATED",
+                "User",
+                String.valueOf(updated.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                "User updated their own profile");
+
+        return userMapper.toResponseDto(updated);
+    }
+
+    private User currentUser() {
+
+        String email = SecurityUtil.getCurrentUserEmail();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
     }
 }

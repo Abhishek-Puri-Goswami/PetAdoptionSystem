@@ -1,6 +1,7 @@
 package com.petadoption.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.security.JwtAuthenticationFilter;
@@ -50,8 +51,62 @@ class UserControllerTest {
                 "Goswami",
                 "test@test.com",
                 true,
-                Set.of("ROLE_ADOPTER")
+                Set.of("ROLE_ADOPTER"),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
         );
+    }
+
+    @Test
+    void shouldGetMyProfile() throws Exception {
+
+        when(userService.getMyProfile())
+                .thenReturn(buildUser());
+
+        mockMvc.perform(get("/api/users/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success")
+                        .value(true))
+                .andExpect(jsonPath("$.data.email")
+                        .value("test@test.com"));
+    }
+
+    @Test
+    void shouldUpdateMyProfile() throws Exception {
+
+        UpdateProfileRequestDto request =
+                new UpdateProfileRequestDto(
+                        "Abhishek",
+                        "Goswami",
+                        "9876543210",
+                        "12 MG Road",
+                        null,
+                        "Bangalore",
+                        "Karnataka",
+                        "560001",
+                        "India"
+                );
+
+        when(userService.updateMyProfile(any()))
+                .thenReturn(buildUser());
+
+        mockMvc.perform(
+                        put("/api/users/me")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                request)))
+                .andExpect(status().isOk())
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "Profile updated successfully"));
     }
 
     @Test
