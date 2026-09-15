@@ -1,0 +1,86 @@
+package com.petadoption.controller;
+
+import com.petadoption.dto.request.ShelterRequestDto;
+import com.petadoption.dto.response.ApiResponseDto;
+import com.petadoption.dto.response.ShelterResponseDto;
+import com.petadoption.service.ShelterService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/shelters")
+@RequiredArgsConstructor
+public class ShelterController {
+
+    private final ShelterService shelterService;
+
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PostMapping
+    public ApiResponseDto<ShelterResponseDto> createShelter(
+            @Valid @RequestBody ShelterRequestDto request) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Shelter created successfully",
+                shelterService.createShelter(request)
+        );
+    }
+
+    @PreAuthorize(
+            "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
+    @GetMapping
+    public ApiResponseDto<List<ShelterResponseDto>> getAllShelters() {
+
+        return new ApiResponseDto<>(
+                true,
+                "Shelters fetched successfully",
+                shelterService.getAllShelters()
+        );
+    }
+
+    @PreAuthorize(
+            "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
+    @GetMapping("/{id}")
+    public ApiResponseDto<ShelterResponseDto> getShelterById(
+            @PathVariable Long id) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Shelter fetched successfully",
+                shelterService.getShelterById(id)
+        );
+    }
+
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PutMapping("/{id}")
+    public ApiResponseDto<ShelterResponseDto> updateShelter(
+            @PathVariable Long id,
+            @Valid @RequestBody ShelterRequestDto request) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Shelter updated successfully",
+                shelterService.updateShelter(id, request)
+        );
+    }
+
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @DeleteMapping("/{id}")
+    public ApiResponseDto<String> deleteShelter(
+            @PathVariable Long id) {
+
+        shelterService.deleteShelter(id);
+
+        return new ApiResponseDto<>(
+                true,
+                "Shelter deleted successfully",
+                null
+        );
+    }
+}

@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: pet-adoption-system
+
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
+
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#       SQL: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+    health:
+      show-details: always
+
+info:
+  app:
+    name: Pet Adoption System
+    version: 1.0.0
+    description: GenAI Powered Pet Adoption Platform
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

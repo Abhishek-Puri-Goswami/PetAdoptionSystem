@@ -1,0 +1,112 @@
+package com.petadoption.service.impl;
+
+import com.petadoption.dto.request.PetRequestDto;
+import com.petadoption.dto.response.PetResponseDto;
+import com.petadoption.entity.Pet;
+import com.petadoption.exception.ResourceNotFoundException;
+import com.petadoption.mapper.PetMapper;
+import com.petadoption.repository.PetRepository;
+import com.petadoption.service.AuditLogService;
+import com.petadoption.service.PetService;
+import com.petadoption.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class PetServiceImpl implements PetService {
+
+    private final PetRepository petRepository;
+    private final PetMapper petMapper;
+    private final AuditLogService auditLogService;
+
+    @Override
+    public PetResponseDto createPet(PetRequestDto request) {
+
+        Pet pet = petMapper.toEntity(request);
+
+        Pet savedPet = petRepository.save(pet);
+
+        auditLogService.saveAuditLog(
+                "PET_CREATED",
+                "Pet",
+                String.valueOf(savedPet.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                "Pet created successfully");
+
+        return petMapper.toResponseDto(savedPet);
+    }
+
+    @Override
+    public List<PetResponseDto> getAllPets() {
+
+        return petRepository.findAll()
+                .stream()
+                .map(petMapper::toResponseDto)
+                .toList();
+    }
+
+    @Override
+    public PetResponseDto getPetById(Long id) {
+
+        Pet pet =
+                petRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Pet not found"));
+
+        return petMapper.toResponseDto(pet);
+    }
+
+    @Override
+    public PetResponseDto updatePet(
+            Long id,
+            PetRequestDto request) {
+
+        Pet pet =
+                petRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Pet not found"));
+
+        pet.setName(request.name());
+        pet.setSpecies(request.species());
+        pet.setBreed(request.breed());
+        pet.setAge(request.age());
+        pet.setGender(request.gender());
+        pet.setDescription(request.description());
+
+        Pet updatedPet =
+                petRepository.save(pet);
+
+        auditLogService.saveAuditLog(
+                "PET_UPDATED",
+                "Pet",
+                String.valueOf(updatedPet.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                "Pet updated successfully");
+
+        return petMapper.toResponseDto(updatedPet);
+    }
+
+    @Override
+    public void deletePet(Long id) {
+
+        Pet pet =
+                petRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Pet not found"));
+
+        auditLogService.saveAuditLog(
+                "PET_DELETED",
+                "Pet",
+                String.valueOf(pet.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                "Pet deleted successfully");
+
+        petRepository.delete(pet);
+    }
+}
