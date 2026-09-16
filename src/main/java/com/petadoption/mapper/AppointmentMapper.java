@@ -16,6 +16,7 @@ public interface AppointmentMapper {
     @Mapping(target = "petId", source = "pet.id")
     @Mapping(target = "adopterId", source = "adopter.id")
     @Mapping(target = "shelterId", source = "shelter.id")
+    @Mapping(target = "slotId", source = "slot.id")
     AppointmentResponseDto toResponseDto(Appointment appointment);
 
     void updateEntityFromDto(

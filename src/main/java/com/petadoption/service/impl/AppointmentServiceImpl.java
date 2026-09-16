@@ -3,8 +3,8 @@ package com.petadoption.service.impl;
 import com.petadoption.dto.request.AppointmentRequestDto;
 import com.petadoption.dto.response.AppointmentResponseDto;
 import com.petadoption.entity.Appointment;
+import com.petadoption.entity.AvailabilitySlot;
 import com.petadoption.entity.Pet;
-import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
 import com.petadoption.enums.AppointmentStatus;
 import com.petadoption.enums.PetStatus;
@@ -15,8 +15,8 @@ import com.petadoption.notification.EmailService;
 import com.petadoption.notification.EmailTemplateBuilder;
 import com.petadoption.notification.NotificationConstants;
 import com.petadoption.repository.AppointmentRepository;
+import com.petadoption.repository.AvailabilitySlotRepository;
 import com.petadoption.repository.PetRepository;
-import com.petadoption.repository.ShelterRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AppointmentService;
 
@@ -35,16 +35,13 @@ import java.util.List;
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final PetRepository petRepository;
-    private final ShelterRepository shelterRepository;
+    private final AvailabilitySlotRepository slotRepository;
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
     private final EmailService emailService;
     private final AuditLogService auditLogService;
     private final ShelterScopeService shelterScopeService;
-
-    private static final List<AppointmentStatus> ACTIVE_STATUSES =
-            List.of(AppointmentStatus.PENDING, AppointmentStatus.APPROVED);
 
     @Override
     @Transactional
@@ -57,26 +54,20 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 new ResourceNotFoundException(
                                         "Pet not found"));
 
-        Shelter shelter =
-                shelterRepository.findById(
-                                requestDto.shelterId())
+        AvailabilitySlot slot =
+                slotRepository.findById(requestDto.slotId())
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Shelter not found"));
+                                        "Slot not found"));
+
+        if (slot.isBooked()) {
+            throw new BusinessException(
+                    "This slot has already been booked");
+        }
 
         if (pet.getStatus() != PetStatus.AVAILABLE) {
             throw new BusinessException(
                     "Pet is not available for an appointment");
-        }
-
-        if (appointmentRepository
-                .existsByPetIdAndAppointmentDateTimeAndStatusIn(
-                        pet.getId(),
-                        requestDto.appointmentDateTime(),
-                        ACTIVE_STATUSES)) {
-
-            throw new BusinessException(
-                    "This pet already has an appointment at that time");
         }
 
         String email =
@@ -88,14 +79,18 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 new ResourceNotFoundException(
                                         "Adopter not found"));
 
+        slot.setBooked(true);
+        slotRepository.save(slot);
+
         Appointment appointment = new Appointment();
 
         appointment.setPet(pet);
-        appointment.setShelter(shelter);
+        appointment.setShelter(slot.getShelter());
+        appointment.setSlot(slot);
         appointment.setAdopter(adopter);
 
         appointment.setAppointmentDateTime(
-                requestDto.appointmentDateTime());
+                slot.getSlotDateTime());
 
         appointment.setNotes(
                 requestDto.notes());
@@ -279,6 +274,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                     String.valueOf(pet.getId()),
                     SecurityUtil.getCurrentUserEmail(),
                     "Pet returned to available after appointment rejection");
+        }
+
+        if (appointment.getSlot() != null
+                && appointment.getSlot().isBooked()) {
+
+            AvailabilitySlot slot = appointment.getSlot();
+            slot.setBooked(false);
+            slotRepository.save(slot);
         }
 
         appointment.setStatus(

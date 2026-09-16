@@ -3,6 +3,7 @@ package com.petadoption.mapper;
 import com.petadoption.dto.request.AppointmentRequestDto;
 import com.petadoption.dto.response.AppointmentResponseDto;
 import com.petadoption.entity.Appointment;
+import com.petadoption.entity.AvailabilitySlot;
 import com.petadoption.entity.Pet;
 import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
@@ -26,14 +27,10 @@ class AppointmentMapperTest {
     @Test
     void shouldMapRequestDtoToEntity() {
 
-        LocalDateTime dateTime =
-                LocalDateTime.now().plusDays(1);
-
         AppointmentRequestDto dto =
                 new AppointmentRequestDto(
                         1L,
                         2L,
-                        dateTime,
                         "Visit pet"
                 );
 
@@ -41,11 +38,6 @@ class AppointmentMapperTest {
                 mapper.toEntity(dto);
 
         assertNotNull(appointment);
-
-        assertEquals(
-                dateTime,
-                appointment.getAppointmentDateTime()
-        );
 
         assertEquals(
                 "Visit pet",
@@ -65,6 +57,9 @@ class AppointmentMapperTest {
         Shelter shelter = new Shelter();
         shelter.setId(30L);
 
+        AvailabilitySlot slot = new AvailabilitySlot();
+        slot.setId(40L);
+
         Appointment appointment =
                 new Appointment();
 
@@ -72,6 +67,7 @@ class AppointmentMapperTest {
         appointment.setPet(pet);
         appointment.setAdopter(adopter);
         appointment.setShelter(shelter);
+        appointment.setSlot(slot);
 
         appointment.setAppointmentDateTime(
                 LocalDateTime.of(
@@ -119,6 +115,11 @@ class AppointmentMapperTest {
         );
 
         assertEquals(
+                40L,
+                dto.slotId()
+        );
+
+        assertEquals(
                 "Meet and greet",
                 dto.notes()
         );
@@ -134,7 +135,6 @@ class AppointmentMapperTest {
                 new AppointmentRequestDto(
                         1L,
                         2L,
-                        LocalDateTime.now().plusDays(1),
                         "Updated notes"
                 );
 

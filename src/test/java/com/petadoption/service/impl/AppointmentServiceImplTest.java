@@ -3,6 +3,7 @@ package com.petadoption.service.impl;
 import com.petadoption.dto.request.AppointmentRequestDto;
 import com.petadoption.dto.response.AppointmentResponseDto;
 import com.petadoption.entity.Appointment;
+import com.petadoption.entity.AvailabilitySlot;
 import com.petadoption.entity.Pet;
 import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
@@ -13,8 +14,8 @@ import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.AppointmentMapper;
 import com.petadoption.notification.EmailService;
 import com.petadoption.repository.AppointmentRepository;
+import com.petadoption.repository.AvailabilitySlotRepository;
 import com.petadoption.repository.PetRepository;
-import com.petadoption.repository.ShelterRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ShelterScopeService;
@@ -43,7 +44,7 @@ class AppointmentServiceImplTest {
     private PetRepository petRepository;
 
     @Mock
-    private ShelterRepository shelterRepository;
+    private AvailabilitySlotRepository slotRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -88,15 +89,21 @@ class AppointmentServiceImplTest {
                 new AppointmentRequestDto(
                         1L,
                         1L,
-                        LocalDateTime.now().plusDays(1),
                         "Visit"
                 );
 
         Pet pet = new Pet();
         pet.setId(1L);
+        pet.setStatus(PetStatus.AVAILABLE);
 
         Shelter shelter = new Shelter();
         shelter.setId(1L);
+
+        AvailabilitySlot slot = new AvailabilitySlot();
+        slot.setId(1L);
+        slot.setShelter(shelter);
+        slot.setSlotDateTime(LocalDateTime.now().plusDays(1));
+        slot.setBooked(false);
 
         User adopter = new User();
         adopter.setEmail("test@test.com");
@@ -109,6 +116,7 @@ class AppointmentServiceImplTest {
         AppointmentResponseDto response =
                 new AppointmentResponseDto(
                         10L,
+                        1L,
                         1L,
                         1L,
                         1L,
@@ -126,8 +134,8 @@ class AppointmentServiceImplTest {
             when(petRepository.findById(1L))
                     .thenReturn(Optional.of(pet));
 
-            when(shelterRepository.findById(1L))
-                    .thenReturn(Optional.of(shelter));
+            when(slotRepository.findById(1L))
+                    .thenReturn(Optional.of(slot));
 
             when(userRepository.findByEmail(
                     "test@test.com"))
@@ -146,6 +154,10 @@ class AppointmentServiceImplTest {
 
             assertThat(result).isNotNull();
 
+            assertThat(slot.isBooked()).isTrue();
+
+            verify(slotRepository).save(slot);
+
             verify(appointmentRepository)
                     .save(any());
         }
@@ -158,7 +170,6 @@ class AppointmentServiceImplTest {
                 new AppointmentRequestDto(
                         1L,
                         1L,
-                        LocalDateTime.now().plusDays(1),
                         "Visit"
                 );
 
@@ -170,6 +181,65 @@ class AppointmentServiceImplTest {
                         request))
                 .isInstanceOf(
                         ResourceNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowWhenSlotNotFound() {
+
+        AppointmentRequestDto request =
+                new AppointmentRequestDto(
+                        1L,
+                        1L,
+                        "Visit"
+                );
+
+        Pet pet = new Pet();
+        pet.setId(1L);
+        pet.setStatus(PetStatus.AVAILABLE);
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        when(slotRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                appointmentService.createAppointment(
+                        request))
+                .isInstanceOf(
+                        ResourceNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowWhenSlotAlreadyBooked() {
+
+        AppointmentRequestDto request =
+                new AppointmentRequestDto(
+                        1L,
+                        1L,
+                        "Visit"
+                );
+
+        Pet pet = new Pet();
+        pet.setId(1L);
+        pet.setStatus(PetStatus.AVAILABLE);
+
+        AvailabilitySlot slot = new AvailabilitySlot();
+        slot.setId(1L);
+        slot.setBooked(true);
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        when(slotRepository.findById(1L))
+                .thenReturn(Optional.of(slot));
+
+        assertThatThrownBy(() ->
+                appointmentService.createAppointment(
+                        request))
+                .isInstanceOf(BusinessException.class);
+
+        verify(appointmentRepository, never()).save(any());
     }
 
     @Test
@@ -593,6 +663,49 @@ class AppointmentServiceImplTest {
                     .isEqualTo(PetStatus.AVAILABLE);
 
             verify(petRepository, never()).save(any());
+        }
+    }
+
+    @Test
+    void shouldReleaseSlotWhenRejectingAppointment() {
+
+        User adopter = new User();
+        adopter.setEmail("test@test.com");
+        adopter.setFirstName("Abhishek");
+
+        Pet pet = new Pet();
+        pet.setName("Buddy");
+        pet.setStatus(PetStatus.PENDING_ADOPTION);
+
+        AvailabilitySlot slot = new AvailabilitySlot();
+        slot.setId(5L);
+        slot.setBooked(true);
+
+        Appointment appointment = new Appointment();
+        appointment.setAdopter(adopter);
+        appointment.setPet(pet);
+        appointment.setSlot(slot);
+
+        when(appointmentRepository.findById(1L))
+                .thenReturn(Optional.of(appointment));
+
+        when(appointmentRepository.save(any()))
+                .thenReturn(appointment);
+
+        when(appointmentMapper.toResponseDto(appointment))
+                .thenReturn(mock(AppointmentResponseDto.class));
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("admin@test.com");
+
+            appointmentService.rejectAppointment(1L);
+
+            assertThat(slot.isBooked()).isFalse();
+
+            verify(slotRepository).save(slot);
         }
     }
 }

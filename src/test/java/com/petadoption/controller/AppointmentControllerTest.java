@@ -15,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +48,6 @@ class AppointmentControllerTest {
                 new AppointmentRequestDto(
                         1L,
                         1L,
-                        LocalDateTime.now().plusDays(1),
                         "Visit pet"
                 );
 

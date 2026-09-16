@@ -1257,6 +1257,98 @@
           "description": null,
           "preRequestScript": "",
           "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cv5slotmgmt0shelteradmin01",
+          "name": "03 - Slot Management",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"slotDateTime\": \"2026-10-01T10:00:00\"\n}",
+                "contentType": "application/json"
+              },
+              "name": "Create Slot",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/slots",
+              "responses": {},
+              "testScript": "",
+              "description": "Shelter is derived from the caller's own shelter link, never client-supplied.",
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cv5slotcreate0shelteradmin01"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get My Slots",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/slots/my",
+              "responses": {},
+              "testScript": "",
+              "description": "All slots (open + booked) for the caller's own shelter.",
+              "preRequestScript": "",
+              "requestVariables": [],
+              "id": "cv5slotmy0shelteradmin01"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Delete Slot by Id",
+              "method": "DELETE",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/slots/<<slotId>>",
+              "responses": {},
+              "testScript": "",
+              "description": "Fails if the slot has already been booked or has appointment history.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "slotId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cv5slotdelete0shelteradmin01"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
         }
       ],
       "requests": [],
@@ -1696,7 +1788,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"petId\": 5,\n  \"shelterId\": 1,\n  \"appointmentDateTime\": \"2026-09-21T14:30:00\",\n  \"notes\": \"Would like to interact with the pet and discuss its medical history.\"\n}",
+                "body": "{\n  \"petId\": 5,\n  \"slotId\": 1,\n  \"notes\": \"Would like to interact with the pet and discuss its medical history.\"\n}",
                 "contentType": "application/json"
               },
               "name": "Create Appointment ",
@@ -1706,10 +1798,39 @@
               "endpoint": "<<baseUrl>>/api/appointments",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": "Book an appointment for an open slot (pick slotId from \"Browse Open Slots for Shelter\"). shelterId is derived from the slot, not client-supplied.",
               "preRequestScript": "",
               "requestVariables": [],
               "id": "cmu1jz2vf1cjndi1iq0lb5mbn"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenAdopter>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Browse Open Slots for Shelter",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/slots/shelter/<<shelterId>>",
+              "responses": {},
+              "testScript": "",
+              "description": null,
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "shelterId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cv5slotbrowse0adopter01"
             },
             {
               "v": "17",

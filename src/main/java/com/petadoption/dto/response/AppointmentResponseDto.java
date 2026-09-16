@@ -12,6 +12,8 @@ public record AppointmentResponseDto(
 
         Long shelterId,
 
+        Long slotId,
+
         LocalDateTime appointmentDateTime,
 
         String notes,

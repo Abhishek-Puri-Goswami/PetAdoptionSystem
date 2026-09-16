@@ -35,4 +35,8 @@ public class Appointment extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "shelter_id")
     private Shelter shelter;
+
+    @ManyToOne
+    @JoinColumn(name = "slot_id")
+    private AvailabilitySlot slot;
 }
