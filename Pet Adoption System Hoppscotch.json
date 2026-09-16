@@ -180,6 +180,50 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cmtwpvm68008oel1isfm9z3am"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "none",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"email\": \"nandini@example.com\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Forgot Password",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/auth/forgot-password",
+          "responses": {},
+          "testScript": "",
+          "description": "Always returns the same generic success message, whether or not the email is registered - avoids leaking which emails exist. The actual reset token is emailed to the user (check the local dev DB's password_reset_tokens table if no real mailbox is configured).",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv6forgotpassword01"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "none",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"token\": \"paste-the-reset-token-here\",\n  \"newPassword\": \"NewPassword@123\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Reset Password",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/auth/reset-password",
+          "responses": {},
+          "testScript": "",
+          "description": "Token is single-use and expires 1 hour after Forgot Password was called.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv6resetpassword01"
         }
       ],
       "auth": {
@@ -243,6 +287,75 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cv1updatemyprofile0req002d"
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cv6notifications0toplevel01",
+      "name": "01b - Notifications (Any Role)",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Get My Notifications",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/notifications/my",
+          "responses": {},
+          "testScript": "",
+          "description": "Works for any authenticated role - swap the token to test as any user.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv6notificationsmy01"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Mark Notification as Read",
+          "method": "PUT",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/notifications/<<notificationId>>/read",
+          "responses": {},
+          "testScript": "",
+          "description": "Fails if the notification does not belong to the caller.",
+          "preRequestScript": "",
+          "requestVariables": [
+            {
+              "key": "notificationId",
+              "value": "1",
+              "active": true
+            }
+          ],
+          "id": "cv6notificationsread01"
         }
       ],
       "auth": {
@@ -844,7 +957,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"Charlie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"HIGH\",\n  \"temperament\": \"PLAYFUL\"\n}",
+                "body": "{\n  \"name\": \"Charlie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"HIGH\",\n  \"temperament\": \"PLAYFUL\",\n  \"sterilized\": true,\n  \"specialCareNotes\": null\n}",
                 "contentType": "application/json"
               },
               "name": "Create Pet",
@@ -867,7 +980,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"Roodie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"MEDIUM\",\n  \"temperament\": \"AFFECTIONATE\"\n}",
+                "body": "{\n  \"name\": \"Roodie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"MEDIUM\",\n  \"temperament\": \"AFFECTIONATE\",\n  \"sterilized\": true,\n  \"specialCareNotes\": \"Needs joint supplements daily\"\n}",
                 "contentType": "application/json"
               },
               "name": "Edit Pet by Id",
@@ -952,6 +1065,42 @@
                 }
               ],
               "id": "cv2img01pload0pet0image0req"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": [
+                  {
+                    "key": "file",
+                    "value": "",
+                    "active": true,
+                    "isFile": true
+                  }
+                ],
+                "contentType": "multipart/form-data"
+              },
+              "name": "Add Pet Gallery Image",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>/images",
+              "responses": {},
+              "testScript": "",
+              "description": "Appends a gallery photo without replacing the main image. Select a file for the 'file' form field before sending.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "6",
+                  "active": true
+                }
+              ],
+              "id": "cv6petgalleryimageadd01"
             }
           ],
           "auth": {
@@ -1041,8 +1190,8 @@
                 "authActive": true
               },
               "body": {
-                "body": null,
-                "contentType": null
+                "body": "{\n  \"notes\": \"Great home visit, approved\"\n}",
+                "contentType": "application/json"
               },
               "name": "Approve Adoption Application by Id",
               "method": "PUT",
@@ -1051,7 +1200,7 @@
               "endpoint": "<<baseUrl>>/api/adoptions/<<adoptionId>>/approve",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": "Body is optional. \"notes\" becomes the application's reviewNotes.",
               "preRequestScript": "",
               "requestVariables": [
                 {
@@ -1070,8 +1219,8 @@
                 "authActive": true
               },
               "body": {
-                "body": null,
-                "contentType": null
+                "body": "{\n  \"notes\": \"Home visit revealed no secure yard, unsuitable for this breed\"\n}",
+                "contentType": "application/json"
               },
               "name": "Reject Adoption Application by Id",
               "method": "PUT",
@@ -1080,7 +1229,7 @@
               "endpoint": "<<baseUrl>>/api/adoptions/<<adoptionId>>/reject",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": "Body is optional. \"notes\" becomes the application's rejectionReason.",
               "preRequestScript": "",
               "requestVariables": [
                 {
@@ -1349,6 +1498,81 @@
           "description": null,
           "preRequestScript": "",
           "testScript": ""
+        },
+        {
+          "v": 12,
+          "id": "cv6medicalrecords0shelteradmin01",
+          "name": "04 - Medical Records",
+          "folders": [],
+          "requests": [
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": "{\n  \"recordDate\": \"2026-09-01\",\n  \"description\": \"Annual vaccination\",\n  \"vetName\": \"Dr. Patel\"\n}",
+                "contentType": "application/json"
+              },
+              "name": "Create Medical Record",
+              "method": "POST",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>/medical-records",
+              "responses": {},
+              "testScript": "",
+              "description": "Shelter Admin/Staff of the pet's own shelter only. Adopters cannot access medical records at all.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "5",
+                  "active": true
+                }
+              ],
+              "id": "cv6medrecordcreate01"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": null,
+                "contentType": null
+              },
+              "name": "Get Medical Records for Pet",
+              "method": "GET",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>/medical-records",
+              "responses": {},
+              "testScript": "",
+              "description": "Shelter Admin/Staff (own shelter) or System Admin only.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "5",
+                  "active": true
+                }
+              ],
+              "id": "cv6medrecordget01"
+            }
+          ],
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "headers": [],
+          "variables": [],
+          "description": null,
+          "preRequestScript": "",
+          "testScript": ""
         }
       ],
       "requests": [],
@@ -1395,6 +1619,46 @@
                 {
                   "key": "size",
                   "value": "20",
+                  "active": false
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc",
+                  "active": false
+                },
+                {
+                  "key": "species",
+                  "value": "Dog",
+                  "active": false
+                },
+                {
+                  "key": "energyLevel",
+                  "value": "MEDIUM",
+                  "active": false
+                },
+                {
+                  "key": "temperament",
+                  "value": "PLAYFUL",
+                  "active": false
+                },
+                {
+                  "key": "minAge",
+                  "value": "1",
+                  "active": false
+                },
+                {
+                  "key": "maxAge",
+                  "value": "5",
+                  "active": false
+                },
+                {
+                  "key": "status",
+                  "value": "AVAILABLE",
+                  "active": false
+                },
+                {
+                  "key": "search",
+                  "value": "friendly",
                   "active": false
                 }
               ],
@@ -1562,6 +1826,46 @@
                   "key": "size",
                   "value": "20",
                   "active": false
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc",
+                  "active": false
+                },
+                {
+                  "key": "species",
+                  "value": "Dog",
+                  "active": false
+                },
+                {
+                  "key": "energyLevel",
+                  "value": "MEDIUM",
+                  "active": false
+                },
+                {
+                  "key": "temperament",
+                  "value": "PLAYFUL",
+                  "active": false
+                },
+                {
+                  "key": "minAge",
+                  "value": "1",
+                  "active": false
+                },
+                {
+                  "key": "maxAge",
+                  "value": "5",
+                  "active": false
+                },
+                {
+                  "key": "status",
+                  "value": "AVAILABLE",
+                  "active": false
+                },
+                {
+                  "key": "search",
+                  "value": "friendly",
+                  "active": false
                 }
               ],
               "headers": [],
@@ -1661,12 +1965,28 @@
               },
               "name": "Get All Shelters",
               "method": "GET",
-              "params": [],
+              "params": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "active": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "active": false
+                },
+                {
+                  "key": "name",
+                  "value": "Second",
+                  "active": false
+                }
+              ],
               "headers": [],
               "endpoint": "<<baseUrl>>/api/shelters",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": "Response is now a paginated PageResponseDto (data.content is the list), not a plain array - update any existing environment scripts that assumed a bare array.",
               "preRequestScript": "",
               "requestVariables": [],
               "id": "cmtwsxfnc016pdi1ifzjqszoi"
@@ -1696,7 +2016,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"petId\": 3,\n  \"adopterId\": 4,\n  \"applicantNotes\": \"I previously owned a Golden Retriever for 10 years and am fully prepared for veterinary and grooming responsibilities.\"\n}",
+                "body": "{\n  \"petId\": 3,\n  \"applicantNotes\": \"I previously owned a Golden Retriever for 10 years and am fully prepared for veterinary and grooming responsibilities.\",\n  \"livingSituation\": \"House with a fenced yard\",\n  \"priorPetExperience\": \"Had a Golden Retriever for 10 years\",\n  \"householdDetails\": \"2 adults, no children\",\n  \"preferredContact\": \"email\"\n}",
                 "contentType": "application/json"
               },
               "name": "Create Adoption Application",
