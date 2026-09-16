@@ -33,7 +33,9 @@ class PetMapperTest {
                         "Male",
                         "Friendly dog",
                         EnergyLevel.MEDIUM,
-                        Temperament.PLAYFUL
+                        Temperament.PLAYFUL,
+                        true,
+                        "Needs daily medication"
                 );
 
         Pet pet =
@@ -80,6 +82,13 @@ class PetMapperTest {
                 Temperament.PLAYFUL,
                 pet.getTemperament()
         );
+
+        assertTrue(pet.isSterilized());
+
+        assertEquals(
+                "Needs daily medication",
+                pet.getSpecialCareNotes()
+        );
     }
 
     @Test
@@ -98,11 +107,18 @@ class PetMapperTest {
         pet.setImageUrl("https://cdn.example.com/buddy.jpg");
         pet.setEnergyLevel(EnergyLevel.HIGH);
         pet.setTemperament(Temperament.AFFECTIONATE);
+        pet.setSterilized(true);
+        pet.setSpecialCareNotes("Needs daily medication");
 
         Shelter shelter = new Shelter();
         shelter.setId(5L);
         shelter.setName("Happy Paws");
         pet.setShelter(shelter);
+
+        com.petadoption.entity.PetImage image =
+                new com.petadoption.entity.PetImage();
+        image.setImageUrl("https://cdn.example.com/buddy2.jpg");
+        pet.setImages(java.util.List.of(image));
 
         PetResponseDto dto =
                 mapper.toResponseDto(pet);
@@ -162,6 +178,18 @@ class PetMapperTest {
         assertEquals(
                 Temperament.AFFECTIONATE,
                 dto.temperament()
+        );
+
+        assertTrue(dto.sterilized());
+
+        assertEquals(
+                "Needs daily medication",
+                dto.specialCareNotes()
+        );
+
+        assertEquals(
+                java.util.List.of("https://cdn.example.com/buddy2.jpg"),
+                dto.imageUrls()
         );
 
         assertEquals(

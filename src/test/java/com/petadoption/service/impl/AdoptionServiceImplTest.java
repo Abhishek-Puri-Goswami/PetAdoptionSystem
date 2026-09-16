@@ -62,6 +62,10 @@ class AdoptionServiceImplTest {
     @Mock
     private ShelterScopeService shelterScopeService;
 
+    @Mock
+    private com.petadoption.service.AppNotificationService
+            appNotificationService;
+
     @InjectMocks
     private AdoptionServiceImpl adoptionService;
 
@@ -86,7 +90,8 @@ class AdoptionServiceImplTest {
         AdoptionRequestDto request =
                 new AdoptionRequestDto(
                         1L,
-                        "Interested");
+                        "Interested",
+                        null, null, null, null);
 
         Pet pet = new Pet();
         pet.setId(1L);
@@ -109,6 +114,7 @@ class AdoptionServiceImplTest {
                         1L,
                         "test@test.com",
                         "Interested",
+                        null, null, null, null, null, null,
                         ApplicationStatus.PENDING
                 );
 
@@ -150,7 +156,8 @@ class AdoptionServiceImplTest {
         AdoptionRequestDto request =
                 new AdoptionRequestDto(
                         1L,
-                        "Interested");
+                        "Interested",
+                        null, null, null, null);
 
         when(petRepository.findById(1L))
                 .thenReturn(Optional.empty());
@@ -168,7 +175,8 @@ class AdoptionServiceImplTest {
         AdoptionRequestDto request =
                 new AdoptionRequestDto(
                         1L,
-                        "Interested");
+                        "Interested",
+                        null, null, null, null);
 
         Pet pet = new Pet();
         pet.setStatus(PetStatus.ADOPTED);
@@ -228,7 +236,7 @@ class AdoptionServiceImplTest {
             mocked.when(SecurityUtil::getCurrentUserEmail)
                     .thenReturn("admin@test.com");
 
-            adoptionService.approveApplication(1L);
+            adoptionService.approveApplication(1L, null);
 
             assertThat(application.getStatus())
                     .isEqualTo(
@@ -253,10 +261,14 @@ class AdoptionServiceImplTest {
         adopter.setFirstName("Abhishek");
         adopter.setEmail("test@test.com");
 
+        Pet pet = new Pet();
+        pet.setName("Buddy");
+
         AdoptionApplication application =
                 new AdoptionApplication();
 
         application.setAdopter(adopter);
+        application.setPet(pet);
 
         when(adoptionRepository.findById(1L))
                 .thenReturn(Optional.of(application));
@@ -273,7 +285,7 @@ class AdoptionServiceImplTest {
             mocked.when(SecurityUtil::getCurrentUserEmail)
                     .thenReturn("admin@test.com");
 
-            adoptionService.rejectApplication(1L);
+            adoptionService.rejectApplication(1L, null);
 
             assertThat(application.getStatus())
                     .isEqualTo(
@@ -573,7 +585,7 @@ class AdoptionServiceImplTest {
 
         assertThatThrownBy(
                 () -> adoptionService
-                        .approveApplication(1L))
+                        .approveApplication(1L, null))
                 .isInstanceOf(
                         ResourceNotFoundException.class);
     }
@@ -586,7 +598,7 @@ class AdoptionServiceImplTest {
 
         assertThatThrownBy(
                 () -> adoptionService
-                        .rejectApplication(1L))
+                        .rejectApplication(1L, null))
                 .isInstanceOf(
                         ResourceNotFoundException.class);
     }

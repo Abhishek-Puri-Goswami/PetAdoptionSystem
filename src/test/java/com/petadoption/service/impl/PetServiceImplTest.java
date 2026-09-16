@@ -14,6 +14,7 @@ import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.PetMapper;
 import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.AppointmentRepository;
+import com.petadoption.repository.PetImageRepository;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
@@ -66,6 +67,9 @@ class PetServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private PetImageRepository petImageRepository;
+
     @InjectMocks
     private PetServiceImpl petService;
 
@@ -97,7 +101,9 @@ class PetServiceImplTest {
                         "Male",
                         "Friendly dog",
                         EnergyLevel.MEDIUM,
-                        Temperament.PLAYFUL
+                        Temperament.PLAYFUL,
+                        false,
+                        null
                 );
 
         responseDto =
@@ -113,6 +119,9 @@ class PetServiceImplTest {
                         null,
                         EnergyLevel.MEDIUM,
                         Temperament.PLAYFUL,
+                        false,
+                        null,
+                        List.of(),
                         10L,
                         "Happy Paws"
                 );
@@ -205,7 +214,9 @@ class PetServiceImplTest {
 
         Pageable pageable = PageRequest.of(0, 20);
 
-        when(petRepository.findAll(pageable))
+        when(petRepository.findAll(
+                        any(org.springframework.data.jpa.domain.Specification.class),
+                        eq(pageable)))
                 .thenReturn(
                         new PageImpl<>(List.of(pet), pageable, 1)
                 );
@@ -214,7 +225,7 @@ class PetServiceImplTest {
                 .thenReturn(responseDto);
 
         PageResponseDto<PetResponseDto> result =
-                petService.getAllPets(pageable);
+                petService.getAllPets(pageable, null);
 
         assertEquals(
                 1,
@@ -572,5 +583,72 @@ class PetServiceImplTest {
                         1L
                 )
         );
+    }
+
+    @Test
+    void shouldAddPetGalleryImage() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "gallery.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        when(imageStorageService.uploadImage(file, "pet-adoption/pets"))
+                .thenReturn(new ImageStorageService.ImageUploadResult(
+                        "https://cdn.example.com/gallery.jpg",
+                        "pet-adoption/pets/gallery123"));
+
+        when(petMapper.toResponseDto(pet))
+                .thenReturn(responseDto);
+
+        PetResponseDto result =
+                petService.addPetGalleryImage(1L, file);
+
+        assertNotNull(result);
+
+        verify(petImageRepository).save(any());
+    }
+
+    @Test
+    void shouldThrowWhenAddingGalleryImageForMissingPet() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "gallery.jpg",
+                        "image/jpeg",
+                        "fake-image-bytes".getBytes());
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> petService.addPetGalleryImage(1L, file));
+    }
+
+    @Test
+    void shouldThrowWhenAddingEmptyGalleryImage() {
+
+        MultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "empty.jpg",
+                        "image/jpeg",
+                        new byte[0]);
+
+        when(petRepository.findById(1L))
+                .thenReturn(Optional.of(pet));
+
+        assertThrows(
+                BusinessException.class,
+                () -> petService.addPetGalleryImage(1L, file));
+
+        verify(petImageRepository, never()).save(any());
     }
 }

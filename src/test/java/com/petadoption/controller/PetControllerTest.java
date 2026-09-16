@@ -47,7 +47,7 @@ class PetControllerTest {
     @Test
     void shouldGetAllPets() throws Exception {
 
-        when(petService.getAllPets(any()))
+        when(petService.getAllPets(any(), any()))
                 .thenReturn(
                         new PageResponseDto<>(
                                 List.of(), 0, 20, 0, 0, true));
@@ -84,7 +84,9 @@ class PetControllerTest {
                         "Male",
                         "Friendly dog",
                         EnergyLevel.MEDIUM,
-                        Temperament.PLAYFUL
+                        Temperament.PLAYFUL,
+                        false,
+                        null
                 );
 
         when(petService.createPet(any()))
@@ -114,7 +116,9 @@ class PetControllerTest {
                         "Male",
                         "Updated description",
                         EnergyLevel.LOW,
-                        Temperament.CALM
+                        Temperament.CALM,
+                        true,
+                        "Needs daily medication"
                 );
 
         when(petService.updatePet(
@@ -143,6 +147,29 @@ class PetControllerTest {
 
         mockMvc.perform(
                         delete("/api/pets/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success")
+                        .value(true));
+    }
+
+    @Test
+    void shouldAddPetGalleryImage() throws Exception {
+
+        when(petService.addPetGalleryImage(any(), any()))
+                .thenReturn(
+                        org.mockito.Mockito.mock(
+                                PetResponseDto.class));
+
+        org.springframework.mock.web.MockMultipartFile file =
+                new org.springframework.mock.web.MockMultipartFile(
+                        "file", "photo.png", "image/png",
+                        "fake-image-bytes".getBytes());
+
+        mockMvc.perform(
+                        org.springframework.test.web.servlet.request
+                                .MockMvcRequestBuilders
+                                .multipart("/api/pets/1/images")
+                                .file(file))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success")
                         .value(true));

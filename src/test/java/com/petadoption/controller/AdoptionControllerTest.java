@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,7 +48,11 @@ class AdoptionControllerTest {
         AdoptionRequestDto request =
                 new AdoptionRequestDto(
                         1L,
-                        "Interested in adoption"
+                        "Interested in adoption",
+                        "Apartment with a yard",
+                        "Had a dog for 10 years",
+                        "Two adults, no kids",
+                        "email"
                 );
 
         when(adoptionService.createApplication(any()))
@@ -113,7 +118,7 @@ class AdoptionControllerTest {
     @Test
     void shouldApproveApplication() throws Exception {
 
-        when(adoptionService.approveApplication(1L))
+        when(adoptionService.approveApplication(eq(1L), any()))
                 .thenReturn(
                         org.mockito.Mockito.mock(
                                 AdoptionResponseDto.class));
@@ -126,7 +131,7 @@ class AdoptionControllerTest {
     @Test
     void shouldRejectApplication() throws Exception {
 
-        when(adoptionService.rejectApplication(1L))
+        when(adoptionService.rejectApplication(eq(1L), any()))
                 .thenReturn(
                         org.mockito.Mockito.mock(
                                 AdoptionResponseDto.class));

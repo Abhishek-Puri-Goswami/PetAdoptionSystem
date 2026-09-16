@@ -64,6 +64,10 @@ class AppointmentServiceImplTest {
     @Mock
     private ShelterScopeService shelterScopeService;
 
+    @Mock
+    private com.petadoption.service.AppNotificationService
+            appNotificationService;
+
     @InjectMocks
     private AppointmentServiceImpl appointmentService;
 

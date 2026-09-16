@@ -1,6 +1,7 @@
 package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.ShelterRequestDto;
+import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.ShelterResponseDto;
 import com.petadoption.entity.Shelter;
 import com.petadoption.exception.BusinessException;
@@ -18,6 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -123,19 +127,44 @@ class ShelterServiceImplTest {
     @Test
     void shouldGetAllShelters() {
 
-        when(shelterRepository.findAll())
-                .thenReturn(List.of(shelter));
+        Pageable pageable = PageRequest.of(0, 20);
+
+        when(shelterRepository.findAll(pageable))
+                .thenReturn(new PageImpl<>(List.of(shelter), pageable, 1));
 
         when(shelterMapper.toResponseDto(shelter))
                 .thenReturn(responseDto);
 
-        List<ShelterResponseDto> result =
-                shelterService.getAllShelters();
+        PageResponseDto<ShelterResponseDto> result =
+                shelterService.getAllShelters(pageable, null);
 
         assertEquals(
                 1,
-                result.size()
+                result.content().size()
         );
+    }
+
+    @Test
+    void shouldSearchSheltersByName() {
+
+        Pageable pageable = PageRequest.of(0, 20);
+
+        when(shelterRepository.findByNameContainingIgnoreCase(
+                        "Happy", pageable))
+                .thenReturn(new PageImpl<>(List.of(shelter), pageable, 1));
+
+        when(shelterMapper.toResponseDto(shelter))
+                .thenReturn(responseDto);
+
+        PageResponseDto<ShelterResponseDto> result =
+                shelterService.getAllShelters(pageable, "Happy");
+
+        assertEquals(
+                1,
+                result.content().size()
+        );
+
+        verify(shelterRepository, never()).findAll(pageable);
     }
 
     @Test

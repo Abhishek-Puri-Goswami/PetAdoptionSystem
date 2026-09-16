@@ -1,17 +1,23 @@
 package com.petadoption.service.impl;
 
+import com.petadoption.dto.request.ForgotPasswordRequestDto;
 import com.petadoption.dto.request.LoginRequestDto;
 import com.petadoption.dto.request.RegisterRequestDto;
+import com.petadoption.dto.request.ResetPasswordRequestDto;
 import com.petadoption.dto.response.AuthResponseDto;
+import com.petadoption.entity.PasswordResetToken;
 import com.petadoption.entity.Role;
 import com.petadoption.entity.User;
 import com.petadoption.enums.RoleType;
 import com.petadoption.exception.BusinessException;
 import com.petadoption.notification.EmailService;
+import com.petadoption.repository.PasswordResetTokenRepository;
 import com.petadoption.repository.RoleRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.security.JwtService;
 import com.petadoption.service.AuditLogService;
+
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +33,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,6 +56,9 @@ class AuthServiceImplTest {
 
     @Mock
     private AuditLogService auditLogService;
+
+    @Mock
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -320,5 +330,108 @@ class AuthServiceImplTest {
                 "Invalid email or password",
                 exception.getMessage()
         );
+    }
+
+    @Test
+    void shouldCreateResetTokenAndSendEmailWhenEmailExists() {
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+        user.setFirstName("Abhishek");
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(user));
+
+        authService.forgotPassword(
+                new ForgotPasswordRequestDto("test@test.com"));
+
+        verify(passwordResetTokenRepository)
+                .save(any(PasswordResetToken.class));
+
+        verify(emailService)
+                .sendEmail(
+                        eq("test@test.com"),
+                        anyString(),
+                        anyString());
+    }
+
+    @Test
+    void shouldDoNothingSilentlyWhenForgotPasswordEmailNotFound() {
+
+        when(userRepository.findByEmail("missing@test.com"))
+                .thenReturn(Optional.empty());
+
+        authService.forgotPassword(
+                new ForgotPasswordRequestDto("missing@test.com"));
+
+        verify(passwordResetTokenRepository, never())
+                .save(any());
+
+        verify(emailService, never())
+                .sendEmail(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void shouldResetPasswordWithValidToken() {
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken("valid-token");
+        resetToken.setUser(user);
+        resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(30));
+
+        when(passwordResetTokenRepository.findByToken("valid-token"))
+                .thenReturn(Optional.of(resetToken));
+
+        when(passwordEncoder.encode("newPassword123"))
+                .thenReturn("encoded-new-password");
+
+        authService.resetPassword(
+                new ResetPasswordRequestDto(
+                        "valid-token", "newPassword123"));
+
+        assertEquals(
+                "encoded-new-password",
+                user.getPassword());
+
+        verify(userRepository).save(user);
+        verify(passwordResetTokenRepository).delete(resetToken);
+    }
+
+    @Test
+    void shouldThrowWhenResetTokenNotFound() {
+
+        when(passwordResetTokenRepository.findByToken("bad-token"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                BusinessException.class,
+                () -> authService.resetPassword(
+                        new ResetPasswordRequestDto(
+                                "bad-token", "newPassword123")));
+    }
+
+    @Test
+    void shouldThrowAndDeleteWhenResetTokenExpired() {
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken("expired-token");
+        resetToken.setExpiresAt(LocalDateTime.now().minusMinutes(5));
+
+        when(passwordResetTokenRepository.findByToken("expired-token"))
+                .thenReturn(Optional.of(resetToken));
+
+        assertThrows(
+                BusinessException.class,
+                () -> authService.resetPassword(
+                        new ResetPasswordRequestDto(
+                                "expired-token", "newPassword123")));
+
+        verify(passwordResetTokenRepository).delete(resetToken);
+        verify(userRepository, never()).save(any());
     }
 }
