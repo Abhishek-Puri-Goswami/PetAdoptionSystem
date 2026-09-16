@@ -1,6 +1,7 @@
 package com.petadoption.ai.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.dto.ChatRequestDto;
 import com.petadoption.security.JwtAuthenticationFilter;
 
@@ -36,6 +37,9 @@ class AiChatControllerTest {
 
     @MockitoBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private PetCareAdvisorService petCareAdvisorService;
 
     @Test
     void shouldReturnAiReply() throws Exception {
@@ -102,5 +106,28 @@ class AiChatControllerTest {
                                         objectMapper.writeValueAsString(
                                                 request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnPetCareReply() throws Exception {
+
+        ChatRequestDto request =
+                new ChatRequestDto("How much exercise does a high "
+                        + "energy dog need?");
+
+        when(petCareAdvisorService.ask(
+                "How much exercise does a high energy dog need?"))
+                .thenReturn("At least 60 minutes a day.");
+
+        mockMvc.perform(
+                        post("/api/ai/chat/care")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.reply")
+                        .value("At least 60 minutes a day."));
     }
 }

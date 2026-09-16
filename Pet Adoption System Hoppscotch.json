@@ -1785,6 +1785,52 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cv4genai0ping0req0000001a"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenSystemAdmin>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Ingest RAG Documents",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/ai/rag/ingest",
+          "responses": {},
+          "testScript": "",
+          "description": "Phase 2: (re)ingests the curated markdown docs in src/main/resources/ai-docs into pgvector. Hash-idempotent - re-running with no doc changes returns SKIPPED_UNCHANGED for everything. System Admin only.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv4genai0ragingest0req002b"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"message\": \"How much exercise does a high energy dog need?\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Pet Care Chat (RAG)",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/ai/chat/care",
+          "responses": {},
+          "testScript": "",
+          "description": "Phase 2: Pet Care Advisor, grounded in the ingested docs via QuestionAnswerAdvisor. Run 'Ingest RAG Documents' at least once first.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv4genai0chatcare0req0003c"
         }
       ],
       "auth": {

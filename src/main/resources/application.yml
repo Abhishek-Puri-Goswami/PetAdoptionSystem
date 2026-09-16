@@ -60,8 +60,15 @@ spring.ai.openai:
   api-key: ${OPENAI_API_KEY:placeholder}
   base-url: ${OPENAI_BASE_URL:https://api.openai.com}
   chat:
-    options:
-      model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+    model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+  embedding:
+    base-url: ${OPENAI_EMBEDDING_BASE_URL:${OPENAI_BASE_URL:https://api.openai.com}}
+    model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+
+spring.ai.vectorstore.pgvector:
+  initialize-schema: true
+  index-type: HNSW
+  distance-type: COSINE_DISTANCE
 
 #logging:
 #  level:

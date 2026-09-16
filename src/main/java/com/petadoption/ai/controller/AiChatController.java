@@ -1,5 +1,6 @@
 package com.petadoption.ai.controller;
 
+import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.dto.ChatRequestDto;
 import com.petadoption.ai.dto.ChatResponseDto;
 import com.petadoption.dto.response.ApiResponseDto;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiChatController {
 
     private final ChatClient chatClient;
+    private final PetCareAdvisorService petCareAdvisorService;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/ping")
@@ -44,6 +46,20 @@ public class AiChatController {
                     "AI service is currently unavailable. "
                             + "Please try again later.");
         }
+
+        return new ApiResponseDto<>(
+                true,
+                "AI responded successfully",
+                new ChatResponseDto(reply)
+        );
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/chat/care")
+    public ApiResponseDto<ChatResponseDto> care(
+            @Valid @RequestBody ChatRequestDto request) {
+
+        String reply = petCareAdvisorService.ask(request.message());
 
         return new ApiResponseDto<>(
                 true,
