@@ -53,6 +53,19 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(AiServiceException.class)
+    public ResponseEntity<ErrorResponseDto> handleAiServiceException(
+            AiServiceException ex) {
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponseDto.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                        .error("AI Service Unavailable")
+                        .message(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleValidationException(
             MethodArgumentNotValidException ex) {

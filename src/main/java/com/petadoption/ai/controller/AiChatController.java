@@ -1,0 +1,54 @@
+package com.petadoption.ai.controller;
+
+import com.petadoption.ai.dto.ChatRequestDto;
+import com.petadoption.ai.dto.ChatResponseDto;
+import com.petadoption.dto.response.ApiResponseDto;
+import com.petadoption.exception.AiServiceException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/ai")
+@RequiredArgsConstructor
+public class AiChatController {
+
+    private final ChatClient chatClient;
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/ping")
+    public ApiResponseDto<ChatResponseDto> ping(
+            @Valid @RequestBody ChatRequestDto request) {
+
+        String reply;
+
+        try {
+
+            reply = chatClient.prompt()
+                    .user(request.message())
+                    .call()
+                    .content();
+
+        } catch (Exception ex) {
+
+            log.error("AI chat call failed", ex);
+
+            throw new AiServiceException(
+                    "AI service is currently unavailable. "
+                            + "Please try again later.");
+        }
+
+        return new ApiResponseDto<>(
+                true,
+                "AI responded successfully",
+                new ChatResponseDto(reply)
+        );
+    }
+}

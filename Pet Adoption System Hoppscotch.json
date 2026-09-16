@@ -1756,6 +1756,46 @@
       "description": null,
       "preRequestScript": "",
       "testScript": ""
+    },
+    {
+      "v": 12,
+      "id": "cv4genai0folder0toplevel01",
+      "name": "06 - GenAI",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"message\": \"What are your hours?\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Ping (LLM smoke test)",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/ai/ping",
+          "responses": {},
+          "testScript": "",
+          "description": "Phase 1: bare LLM connectivity check - no RAG, no tools yet. Works for any authenticated role.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv4genai0ping0req0000001a"
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
     }
   ],
   "requests": [],

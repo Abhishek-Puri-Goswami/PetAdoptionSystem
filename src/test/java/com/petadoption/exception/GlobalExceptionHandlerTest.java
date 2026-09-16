@@ -106,6 +106,37 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleAiServiceException() {
+
+        AiServiceException exception =
+                new AiServiceException(
+                        "AI service is currently unavailable. "
+                                + "Please try again later."
+                );
+
+        ResponseEntity<ErrorResponseDto> response =
+                handler.handleAiServiceException(
+                        exception
+                );
+
+        assertEquals(
+                503,
+                response.getStatusCode().value()
+        );
+
+        assertEquals(
+                "AI Service Unavailable",
+                response.getBody().getError()
+        );
+
+        assertEquals(
+                "AI service is currently unavailable. "
+                        + "Please try again later.",
+                response.getBody().getMessage()
+        );
+    }
+
+    @Test
     void shouldHandleGenericException() {
 
         Exception exception =
