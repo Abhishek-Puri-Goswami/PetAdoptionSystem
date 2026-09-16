@@ -7,6 +7,7 @@ import com.petadoption.entity.Pet;
 import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
 import com.petadoption.enums.AppointmentStatus;
+import com.petadoption.enums.PetStatus;
 import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.AppointmentMapper;
@@ -449,5 +450,149 @@ class AppointmentServiceImplTest {
         assertThatThrownBy(() ->
                 appointmentService.getAppointmentById(1L))
                 .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void shouldMarkPetPendingAdoptionWhenApprovingAppointment() {
+
+        User adopter = new User();
+        adopter.setEmail("test@test.com");
+        adopter.setFirstName("Abhishek");
+
+        Pet pet = new Pet();
+        pet.setName("Buddy");
+        pet.setStatus(PetStatus.AVAILABLE);
+
+        Appointment appointment = new Appointment();
+        appointment.setAdopter(adopter);
+        appointment.setPet(pet);
+
+        when(appointmentRepository.findById(1L))
+                .thenReturn(Optional.of(appointment));
+
+        when(appointmentRepository.save(any()))
+                .thenReturn(appointment);
+
+        when(appointmentMapper.toResponseDto(appointment))
+                .thenReturn(mock(AppointmentResponseDto.class));
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("admin@test.com");
+
+            appointmentService.approveAppointment(1L);
+
+            assertThat(pet.getStatus())
+                    .isEqualTo(PetStatus.PENDING_ADOPTION);
+
+            verify(petRepository).save(pet);
+        }
+    }
+
+    @Test
+    void shouldThrowWhenApprovingAppointmentForUnavailablePet() {
+
+        Pet pet = new Pet();
+        pet.setStatus(PetStatus.ADOPTED);
+
+        Appointment appointment = new Appointment();
+        appointment.setAdopter(new User());
+        appointment.setPet(pet);
+
+        when(appointmentRepository.findById(1L))
+                .thenReturn(Optional.of(appointment));
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("admin@test.com");
+
+            assertThatThrownBy(() ->
+                    appointmentService.approveAppointment(1L))
+                    .isInstanceOf(BusinessException.class);
+
+            verify(appointmentRepository, never()).save(any());
+        }
+    }
+
+    @Test
+    void shouldReturnPetToAvailableWhenRejectingAppointmentThatWasPendingAdoption() {
+
+        User adopter = new User();
+        adopter.setEmail("test@test.com");
+        adopter.setFirstName("Abhishek");
+
+        Pet pet = new Pet();
+        pet.setName("Buddy");
+        pet.setStatus(PetStatus.PENDING_ADOPTION);
+
+        Appointment appointment = new Appointment();
+        appointment.setAdopter(adopter);
+        appointment.setPet(pet);
+
+        when(appointmentRepository.findById(1L))
+                .thenReturn(Optional.of(appointment));
+
+        when(appointmentRepository.save(any()))
+                .thenReturn(appointment);
+
+        when(appointmentMapper.toResponseDto(appointment))
+                .thenReturn(mock(AppointmentResponseDto.class));
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("admin@test.com");
+
+            appointmentService.rejectAppointment(1L);
+
+            assertThat(pet.getStatus())
+                    .isEqualTo(PetStatus.AVAILABLE);
+
+            verify(petRepository).save(pet);
+        }
+    }
+
+    @Test
+    void shouldNotChangePetStatusWhenRejectingAppointmentForNonPendingPet() {
+
+        User adopter = new User();
+        adopter.setEmail("test@test.com");
+        adopter.setFirstName("Abhishek");
+
+        Pet pet = new Pet();
+        pet.setName("Buddy");
+        pet.setStatus(PetStatus.AVAILABLE);
+
+        Appointment appointment = new Appointment();
+        appointment.setAdopter(adopter);
+        appointment.setPet(pet);
+
+        when(appointmentRepository.findById(1L))
+                .thenReturn(Optional.of(appointment));
+
+        when(appointmentRepository.save(any()))
+                .thenReturn(appointment);
+
+        when(appointmentMapper.toResponseDto(appointment))
+                .thenReturn(mock(AppointmentResponseDto.class));
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("admin@test.com");
+
+            appointmentService.rejectAppointment(1L);
+
+            assertThat(pet.getStatus())
+                    .isEqualTo(PetStatus.AVAILABLE);
+
+            verify(petRepository, never()).save(any());
+        }
     }
 }

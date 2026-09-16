@@ -213,6 +213,16 @@ public class AppointmentServiceImpl implements AppointmentService {
                 shelterScopeService.currentUser(),
                 shelterIdOf(appointment));
 
+        Pet pet = appointment.getPet();
+
+        if (pet.getStatus() != PetStatus.AVAILABLE) {
+            throw new BusinessException(
+                    "Pet is no longer available for this appointment");
+        }
+
+        pet.setStatus(PetStatus.PENDING_ADOPTION);
+        petRepository.save(pet);
+
         appointment.setStatus(
                 AppointmentStatus.APPROVED);
 
@@ -225,6 +235,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                 String.valueOf(updated.getId()),
                 SecurityUtil.getCurrentUserEmail(),
                 "Appointment approved");
+
+        auditLogService.saveAuditLog(
+                "PET_STATUS_PENDING_ADOPTION",
+                "Pet",
+                String.valueOf(pet.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                "Pet marked pending adoption after appointment approval");
 
         emailService.sendEmail(
                 appointment.getAdopter().getEmail(),
@@ -249,6 +266,20 @@ public class AppointmentServiceImpl implements AppointmentService {
         shelterScopeService.verifyShelterAccess(
                 shelterScopeService.currentUser(),
                 shelterIdOf(appointment));
+
+        Pet pet = appointment.getPet();
+
+        if (pet.getStatus() == PetStatus.PENDING_ADOPTION) {
+            pet.setStatus(PetStatus.AVAILABLE);
+            petRepository.save(pet);
+
+            auditLogService.saveAuditLog(
+                    "PET_STATUS_AVAILABLE",
+                    "Pet",
+                    String.valueOf(pet.getId()),
+                    SecurityUtil.getCurrentUserEmail(),
+                    "Pet returned to available after appointment rejection");
+        }
 
         appointment.setStatus(
                 AppointmentStatus.REJECTED);
