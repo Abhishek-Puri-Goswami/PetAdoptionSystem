@@ -4,10 +4,16 @@ import com.petadoption.dto.response.ErrorResponseDto;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -132,6 +138,120 @@ class GlobalExceptionHandlerTest {
         assertEquals(
                 "AI service is currently unavailable. "
                         + "Please try again later.",
+                response.getBody().getMessage()
+        );
+    }
+
+    @Test
+    void shouldHandleNoResourceFoundException() {
+
+        NoResourceFoundException exception =
+                mock(NoResourceFoundException.class);
+
+        when(exception.getHttpMethod())
+                .thenReturn(HttpMethod.GET);
+
+        when(exception.getResourcePath())
+                .thenReturn("api/does-not-exist");
+
+        ResponseEntity<ErrorResponseDto> response =
+                handler.handleNoResourceFound(exception);
+
+        assertEquals(
+                404,
+                response.getStatusCode().value()
+        );
+
+        assertEquals(
+                "Not Found",
+                response.getBody().getError()
+        );
+
+        assertTrue(
+                response.getBody().getMessage()
+                        .contains("api/does-not-exist")
+        );
+    }
+
+    @Test
+    void shouldHandleMalformedRequestBodyWithCauseMessage() {
+
+        HttpMessageNotReadableException exception =
+                mock(HttpMessageNotReadableException.class);
+
+        RuntimeException cause = new RuntimeException(
+                "Cannot deserialize value of type EnergyLevel "
+                        + "from String \"SUPERHIGH\"");
+
+        when(exception.getMostSpecificCause())
+                .thenReturn(cause);
+
+        ResponseEntity<ErrorResponseDto> response =
+                handler.handleMalformedRequestBody(exception);
+
+        assertEquals(
+                400,
+                response.getStatusCode().value()
+        );
+
+        assertEquals(
+                "Malformed Request",
+                response.getBody().getError()
+        );
+
+        assertEquals(
+                cause.getMessage(),
+                response.getBody().getMessage()
+        );
+    }
+
+    @Test
+    void shouldHandleMalformedRequestBodyWithNoCause() {
+
+        HttpMessageNotReadableException exception =
+                mock(HttpMessageNotReadableException.class);
+
+        when(exception.getMostSpecificCause())
+                .thenReturn(null);
+
+        ResponseEntity<ErrorResponseDto> response =
+                handler.handleMalformedRequestBody(exception);
+
+        assertEquals(
+                400,
+                response.getStatusCode().value()
+        );
+
+        assertEquals(
+                "The request body is missing or not valid JSON",
+                response.getBody().getMessage()
+        );
+    }
+
+    @Test
+    void shouldHandleTypeMismatchException() {
+
+        MethodArgumentTypeMismatchException exception =
+                mock(MethodArgumentTypeMismatchException.class);
+
+        when(exception.getName())
+                .thenReturn("id");
+
+        ResponseEntity<ErrorResponseDto> response =
+                handler.handleTypeMismatch(exception);
+
+        assertEquals(
+                400,
+                response.getStatusCode().value()
+        );
+
+        assertEquals(
+                "Malformed Request",
+                response.getBody().getError()
+        );
+
+        assertEquals(
+                "Invalid value for parameter 'id'",
                 response.getBody().getMessage()
         );
     }
