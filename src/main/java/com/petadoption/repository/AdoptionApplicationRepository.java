@@ -2,6 +2,8 @@ package com.petadoption.repository;
 
 import com.petadoption.entity.AdoptionApplication;
 import com.petadoption.enums.ApplicationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -10,6 +12,9 @@ public interface AdoptionApplicationRepository
         extends JpaRepository<AdoptionApplication, Long> {
 
     List<AdoptionApplication> findByAdopterId(Long adopterId);
+
+    Page<AdoptionApplication> findByPet_Shelter_Id(
+            Long shelterId, Pageable pageable);
 
     List<AdoptionApplication> findByPetId(Long petId);
 

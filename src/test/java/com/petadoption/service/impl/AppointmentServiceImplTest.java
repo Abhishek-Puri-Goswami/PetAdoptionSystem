@@ -16,6 +16,7 @@ import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.ShelterRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
+import com.petadoption.service.ShelterScopeService;
 import com.petadoption.util.SecurityUtil;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -58,12 +59,25 @@ class AppointmentServiceImplTest {
     @Mock
     private AuditLogService auditLogService;
 
+    @Mock
+    private ShelterScopeService shelterScopeService;
+
     @InjectMocks
     private AppointmentServiceImpl appointmentService;
 
     @BeforeEach
     void setUp() {
+
         MockitoAnnotations.openMocks(this);
+
+        User systemAdmin = new User();
+        systemAdmin.setId(999L);
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(systemAdmin);
+
+        when(shelterScopeService.isSystemAdmin(systemAdmin))
+                .thenReturn(true);
     }
 
     @Test
@@ -356,5 +370,84 @@ class AppointmentServiceImplTest {
                     .isEqualTo(
                             AppointmentStatus.COMPLETED);
         }
+    }
+
+    @Test
+    void shouldScopeAppointmentsToOwnShelterWhenNotSystemAdmin() {
+
+        User shelterAdmin = new User();
+        shelterAdmin.setId(2L);
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(shelterAdmin);
+
+        when(shelterScopeService.isSystemAdmin(shelterAdmin))
+                .thenReturn(false);
+
+        when(shelterScopeService.requireOwnShelterId(shelterAdmin))
+                .thenReturn(7L);
+
+        when(appointmentRepository.findByShelterId(7L))
+                .thenReturn(List.of());
+
+        appointmentService.getAllAppointments();
+
+        verify(appointmentRepository)
+                .findByShelterId(7L);
+
+        verify(appointmentRepository, never())
+                .findAll();
+    }
+
+    @Test
+    void shouldVerifyShelterAccessWhenGettingAppointmentById() {
+
+        Shelter shelter = new Shelter();
+        shelter.setId(3L);
+
+        Appointment appointment = new Appointment();
+        appointment.setId(1L);
+        appointment.setShelter(shelter);
+
+        User caller = new User();
+        caller.setId(2L);
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(caller);
+
+        when(appointmentRepository.findById(1L))
+                .thenReturn(Optional.of(appointment));
+
+        when(appointmentMapper.toResponseDto(appointment))
+                .thenReturn(mock(AppointmentResponseDto.class));
+
+        appointmentService.getAppointmentById(1L);
+
+        verify(shelterScopeService)
+                .verifyShelterAccess(caller, 3L);
+    }
+
+    @Test
+    void shouldRejectAppointmentAccessWhenShelterAccessDenied() {
+
+        Appointment appointment = new Appointment();
+        appointment.setId(1L);
+
+        User caller = new User();
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(caller);
+
+        when(appointmentRepository.findById(1L))
+                .thenReturn(Optional.of(appointment));
+
+        doThrow(new BusinessException(
+                "You do not have access to this shelter's data"))
+                .when(shelterScopeService)
+                .verifyShelterAccess(eq(caller), any());
+
+        assertThatThrownBy(() ->
+                appointmentService.getAppointmentById(1L))
+                .isInstanceOf(BusinessException.class);
     }
 }

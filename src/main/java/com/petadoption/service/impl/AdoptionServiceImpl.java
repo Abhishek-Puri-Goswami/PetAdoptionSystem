@@ -19,6 +19,7 @@ import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AdoptionService;
 import com.petadoption.service.AuditLogService;
+import com.petadoption.service.ShelterScopeService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,7 @@ public class AdoptionServiceImpl implements AdoptionService {
     private final AdoptionMapper adoptionMapper;
     private final EmailService emailService;
     private final AuditLogService auditLogService;
+    private final ShelterScopeService shelterScopeService;
 
     private static final List<ApplicationStatus> ACTIVE_STATUSES =
             List.of(ApplicationStatus.PENDING,
@@ -97,9 +99,18 @@ public class AdoptionServiceImpl implements AdoptionService {
     public PageResponseDto<AdoptionResponseDto> getAllApplications(
             Pageable pageable) {
 
+        User caller = shelterScopeService.currentUser();
+
+        Page<AdoptionApplication> applications =
+                shelterScopeService.isSystemAdmin(caller)
+                        ? adoptionRepository.findAll(pageable)
+                        : adoptionRepository.findByPet_Shelter_Id(
+                                shelterScopeService
+                                        .requireOwnShelterId(caller),
+                                pageable);
+
         Page<AdoptionResponseDto> page =
-                adoptionRepository.findAll(pageable)
-                        .map(adoptionMapper::toResponseDto);
+                applications.map(adoptionMapper::toResponseDto);
 
         return PageResponseDto.from(page);
     }
@@ -162,6 +173,12 @@ public class AdoptionServiceImpl implements AdoptionService {
                                 new ResourceNotFoundException(
                                         "Application not found"));
 
+        User caller = shelterScopeService.currentUser();
+
+        shelterScopeService.verifyShelterAccess(
+                caller,
+                shelterIdOf(application.getPet()));
+
         return adoptionMapper.toResponseDto(application);
     }
 
@@ -176,6 +193,10 @@ public class AdoptionServiceImpl implements AdoptionService {
                                         "Application not found"));
 
         Pet pet = application.getPet();
+
+        shelterScopeService.verifyShelterAccess(
+                shelterScopeService.currentUser(),
+                shelterIdOf(pet));
 
         if (pet.getStatus() == PetStatus.ADOPTED) {
             throw new BusinessException(
@@ -246,6 +267,10 @@ public class AdoptionServiceImpl implements AdoptionService {
                                 new ResourceNotFoundException(
                                         "Application not found"));
 
+        shelterScopeService.verifyShelterAccess(
+                shelterScopeService.currentUser(),
+                shelterIdOf(application.getPet()));
+
         application.setStatus(ApplicationStatus.REJECTED);
 
         AdoptionApplication updated =
@@ -267,5 +292,11 @@ public class AdoptionServiceImpl implements AdoptionService {
         );
 
         return adoptionMapper.toResponseDto(updated);
+    }
+
+    private Long shelterIdOf(Pet pet) {
+        return pet != null && pet.getShelter() != null
+                ? pet.getShelter().getId()
+                : null;
     }
 }

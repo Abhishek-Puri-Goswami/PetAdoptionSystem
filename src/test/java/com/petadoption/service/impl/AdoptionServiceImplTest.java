@@ -12,10 +12,12 @@ import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.AdoptionMapper;
 import com.petadoption.notification.EmailService;
+import com.petadoption.entity.Shelter;
 import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
+import com.petadoption.service.ShelterScopeService;
 import com.petadoption.util.SecurityUtil;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -57,6 +59,9 @@ class AdoptionServiceImplTest {
     @Mock
     private AuditLogService auditLogService;
 
+    @Mock
+    private ShelterScopeService shelterScopeService;
+
     @InjectMocks
     private AdoptionServiceImpl adoptionService;
 
@@ -64,6 +69,15 @@ class AdoptionServiceImplTest {
     void setUp() {
 
         MockitoAnnotations.openMocks(this);
+
+        User systemAdmin = new User();
+        systemAdmin.setId(999L);
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(systemAdmin);
+
+        when(shelterScopeService.isSystemAdmin(systemAdmin))
+                .thenReturn(true);
     }
 
     @Test
@@ -297,6 +311,93 @@ class AdoptionServiceImplTest {
 
         assertThat(result.content())
                 .hasSize(1);
+    }
+
+    @Test
+    void shouldScopeApplicationsToOwnShelterWhenNotSystemAdmin() {
+
+        User shelterAdmin = new User();
+        shelterAdmin.setId(2L);
+
+        Pageable pageable = PageRequest.of(0, 20);
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(shelterAdmin);
+
+        when(shelterScopeService.isSystemAdmin(shelterAdmin))
+                .thenReturn(false);
+
+        when(shelterScopeService.requireOwnShelterId(shelterAdmin))
+                .thenReturn(7L);
+
+        when(adoptionRepository.findByPet_Shelter_Id(7L, pageable))
+                .thenReturn(new PageImpl<>(List.of(), pageable, 0));
+
+        adoptionService.getAllApplications(pageable);
+
+        verify(adoptionRepository)
+                .findByPet_Shelter_Id(7L, pageable);
+
+        verify(adoptionRepository, never())
+                .findAll(any(Pageable.class));
+    }
+
+    @Test
+    void shouldVerifyShelterAccessWhenGettingApplicationById() {
+
+        Shelter shelter = new Shelter();
+        shelter.setId(3L);
+
+        Pet pet = new Pet();
+        pet.setShelter(shelter);
+
+        AdoptionApplication application = new AdoptionApplication();
+        application.setId(1L);
+        application.setPet(pet);
+
+        User caller = new User();
+        caller.setId(2L);
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(caller);
+
+        when(adoptionRepository.findById(1L))
+                .thenReturn(Optional.of(application));
+
+        when(adoptionMapper.toResponseDto(application))
+                .thenReturn(mock(AdoptionResponseDto.class));
+
+        adoptionService.getApplicationById(1L);
+
+        verify(shelterScopeService)
+                .verifyShelterAccess(caller, 3L);
+    }
+
+    @Test
+    void shouldRejectApplicationAccessWhenShelterAccessDenied() {
+
+        Pet pet = new Pet();
+
+        AdoptionApplication application = new AdoptionApplication();
+        application.setId(1L);
+        application.setPet(pet);
+
+        User caller = new User();
+
+        when(shelterScopeService.currentUser())
+                .thenReturn(caller);
+
+        when(adoptionRepository.findById(1L))
+                .thenReturn(Optional.of(application));
+
+        doThrow(new BusinessException(
+                "You do not have access to this shelter's data"))
+                .when(shelterScopeService)
+                .verifyShelterAccess(eq(caller), any());
+
+        assertThatThrownBy(() ->
+                adoptionService.getApplicationById(1L))
+                .isInstanceOf(BusinessException.class);
     }
 
     @Test

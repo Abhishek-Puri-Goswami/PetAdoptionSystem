@@ -21,6 +21,7 @@ import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AppointmentService;
 
 import com.petadoption.service.AuditLogService;
+import com.petadoption.service.ShelterScopeService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 
@@ -40,6 +41,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final EmailService emailService;
     private final AuditLogService auditLogService;
+    private final ShelterScopeService shelterScopeService;
 
     private static final List<AppointmentStatus> ACTIVE_STATUSES =
             List.of(AppointmentStatus.PENDING, AppointmentStatus.APPROVED);
@@ -123,13 +125,26 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 new ResourceNotFoundException(
                                         "Appointment not found with id: " + id));
 
+        shelterScopeService.verifyShelterAccess(
+                shelterScopeService.currentUser(),
+                shelterIdOf(appointment));
+
         return appointmentMapper.toResponseDto(appointment);
     }
 
     @Override
     public List<AppointmentResponseDto> getAllAppointments() {
 
-        return appointmentRepository.findAll()
+        User caller = shelterScopeService.currentUser();
+
+        List<Appointment> appointments =
+                shelterScopeService.isSystemAdmin(caller)
+                        ? appointmentRepository.findAll()
+                        : appointmentRepository.findByShelterId(
+                                shelterScopeService
+                                        .requireOwnShelterId(caller));
+
+        return appointments
                 .stream()
                 .map(appointmentMapper::toResponseDto)
                 .toList();
@@ -194,6 +209,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 new ResourceNotFoundException(
                                         "Appointment not found with id: " + id));
 
+        shelterScopeService.verifyShelterAccess(
+                shelterScopeService.currentUser(),
+                shelterIdOf(appointment));
+
         appointment.setStatus(
                 AppointmentStatus.APPROVED);
 
@@ -226,6 +245,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Appointment not found with id: " + id));
+
+        shelterScopeService.verifyShelterAccess(
+                shelterScopeService.currentUser(),
+                shelterIdOf(appointment));
 
         appointment.setStatus(
                 AppointmentStatus.REJECTED);
@@ -260,6 +283,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 new ResourceNotFoundException(
                                         "Appointment not found with id: " + id));
 
+        shelterScopeService.verifyShelterAccess(
+                shelterScopeService.currentUser(),
+                shelterIdOf(appointment));
+
         appointment.setStatus(
                 AppointmentStatus.COMPLETED);
 
@@ -282,5 +309,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         );
 
         return appointmentMapper.toResponseDto(updated);
+    }
+
+    private Long shelterIdOf(Appointment appointment) {
+        return appointment.getShelter() != null
+                ? appointment.getShelter().getId()
+                : null;
     }
 }
