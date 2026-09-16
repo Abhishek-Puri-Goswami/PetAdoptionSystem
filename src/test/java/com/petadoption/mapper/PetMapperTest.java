@@ -3,7 +3,9 @@ package com.petadoption.mapper;
 import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.enums.EnergyLevel;
 import com.petadoption.enums.PetStatus;
+import com.petadoption.enums.Temperament;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +30,9 @@ class PetMapperTest {
                         "Labrador",
                         2,
                         "Male",
-                        "Friendly dog"
+                        "Friendly dog",
+                        EnergyLevel.MEDIUM,
+                        Temperament.PLAYFUL
                 );
 
         Pet pet =
@@ -65,6 +69,16 @@ class PetMapperTest {
                 "Friendly dog",
                 pet.getDescription()
         );
+
+        assertEquals(
+                EnergyLevel.MEDIUM,
+                pet.getEnergyLevel()
+        );
+
+        assertEquals(
+                Temperament.PLAYFUL,
+                pet.getTemperament()
+        );
     }
 
     @Test
@@ -81,6 +95,8 @@ class PetMapperTest {
         pet.setDescription("Friendly dog");
         pet.setStatus(PetStatus.AVAILABLE);
         pet.setImageUrl("https://cdn.example.com/buddy.jpg");
+        pet.setEnergyLevel(EnergyLevel.HIGH);
+        pet.setTemperament(Temperament.AFFECTIONATE);
 
         PetResponseDto dto =
                 mapper.toResponseDto(pet);
@@ -130,6 +146,16 @@ class PetMapperTest {
         assertEquals(
                 "https://cdn.example.com/buddy.jpg",
                 dto.imageUrl()
+        );
+
+        assertEquals(
+                EnergyLevel.HIGH,
+                dto.energyLevel()
+        );
+
+        assertEquals(
+                Temperament.AFFECTIONATE,
+                dto.temperament()
         );
     }
 }

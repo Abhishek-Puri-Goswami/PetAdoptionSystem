@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
+import com.petadoption.enums.EnergyLevel;
+import com.petadoption.enums.Temperament;
 import com.petadoption.security.JwtAuthenticationFilter;
 import com.petadoption.service.PetService;
 
@@ -80,7 +82,9 @@ class PetControllerTest {
                         "Labrador",
                         2,
                         "Male",
-                        "Friendly dog"
+                        "Friendly dog",
+                        EnergyLevel.MEDIUM,
+                        Temperament.PLAYFUL
                 );
 
         when(petService.createPet(any()))
@@ -108,7 +112,9 @@ class PetControllerTest {
                         "Labrador",
                         2,
                         "Male",
-                        "Updated description"
+                        "Updated description",
+                        EnergyLevel.LOW,
+                        Temperament.CALM
                 );
 
         when(petService.updatePet(

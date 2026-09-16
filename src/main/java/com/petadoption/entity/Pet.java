@@ -1,6 +1,8 @@
 package com.petadoption.entity;
 
+import com.petadoption.enums.EnergyLevel;
 import com.petadoption.enums.PetStatus;
+import com.petadoption.enums.Temperament;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +39,12 @@ public class Pet extends BaseEntity {
     private String imageUrl;
 
     private String imagePublicId;
+
+    @Enumerated(EnumType.STRING)
+    private EnergyLevel energyLevel;
+
+    @Enumerated(EnumType.STRING)
+    private Temperament temperament;
 
     @ManyToOne
     @JoinColumn(name = "shelter_id")

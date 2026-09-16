@@ -1,5 +1,7 @@
 package com.petadoption.dto.request;
 
+import com.petadoption.enums.EnergyLevel;
+import com.petadoption.enums.Temperament;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -17,6 +19,10 @@ public record PetRequestDto(
 
         String gender,
 
-        String description
+        String description,
+
+        EnergyLevel energyLevel,
+
+        Temperament temperament
 ) {
 }

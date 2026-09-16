@@ -90,6 +90,8 @@ public class PetServiceImpl implements PetService {
         pet.setAge(request.age());
         pet.setGender(request.gender());
         pet.setDescription(request.description());
+        pet.setEnergyLevel(request.energyLevel());
+        pet.setTemperament(request.temperament());
 
         Pet updatedPet =
                 petRepository.save(pet);

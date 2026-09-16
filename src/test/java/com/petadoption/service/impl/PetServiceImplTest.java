@@ -4,7 +4,9 @@ import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.enums.EnergyLevel;
 import com.petadoption.enums.PetStatus;
+import com.petadoption.enums.Temperament;
 import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.PetMapper;
@@ -83,7 +85,9 @@ class PetServiceImplTest {
                         "Labrador",
                         2,
                         "Male",
-                        "Friendly dog"
+                        "Friendly dog",
+                        EnergyLevel.MEDIUM,
+                        Temperament.PLAYFUL
                 );
 
         responseDto =
@@ -96,7 +100,9 @@ class PetServiceImplTest {
                         "Male",
                         "Friendly dog",
                         PetStatus.AVAILABLE,
-                        null
+                        null,
+                        EnergyLevel.MEDIUM,
+                        Temperament.PLAYFUL
                 );
     }
 

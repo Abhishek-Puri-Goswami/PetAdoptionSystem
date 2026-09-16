@@ -815,7 +815,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"Charlie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\"\n}",
+                "body": "{\n  \"name\": \"Charlie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"HIGH\",\n  \"temperament\": \"PLAYFUL\"\n}",
                 "contentType": "application/json"
               },
               "name": "Create Pet",
@@ -838,7 +838,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"Roodie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\"\n}",
+                "body": "{\n  \"name\": \"Roodie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"MEDIUM\",\n  \"temperament\": \"AFFECTIONATE\"\n}",
                 "contentType": "application/json"
               },
               "name": "Edit Pet by Id",

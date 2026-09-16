@@ -1,6 +1,8 @@
 package com.petadoption.dto.response;
 
+import com.petadoption.enums.EnergyLevel;
 import com.petadoption.enums.PetStatus;
+import com.petadoption.enums.Temperament;
 
 public record PetResponseDto(
 
@@ -20,6 +22,10 @@ public record PetResponseDto(
 
         PetStatus status,
 
-        String imageUrl
+        String imageUrl,
+
+        EnergyLevel energyLevel,
+
+        Temperament temperament
 ) {
 }
