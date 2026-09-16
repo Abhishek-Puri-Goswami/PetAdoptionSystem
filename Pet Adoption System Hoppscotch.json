@@ -389,6 +389,35 @@
                 "authActive": true
               },
               "body": {
+                "body": "{\n  \"shelterId\": 1\n}",
+                "contentType": "application/json"
+              },
+              "name": "Assign Shelter to User",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/users/<<userId>>/shelter",
+              "responses": {},
+              "testScript": "",
+              "description": "Links a shelter staff/admin account to a shelter (System Admin only). Pass \"shelterId\": null to unassign. A SHELTER_ADMIN must be assigned before they can create pets - the pet's shelter is derived from this link, never client-supplied.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "userId",
+                  "value": "2",
+                  "active": true
+                }
+              ],
+              "id": "cv5assignshelter0req0001a"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenSystemAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
                 "body": null,
                 "contentType": null
               },

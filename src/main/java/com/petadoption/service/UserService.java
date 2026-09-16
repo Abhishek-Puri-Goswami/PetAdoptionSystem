@@ -1,5 +1,6 @@
 package com.petadoption.service;
 
+import com.petadoption.dto.request.AssignShelterRequestDto;
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
@@ -23,4 +24,8 @@ public interface UserService {
     UserResponseDto getMyProfile();
 
     UserResponseDto updateMyProfile(UpdateProfileRequestDto request);
+
+    UserResponseDto assignShelter(
+            Long userId,
+            AssignShelterRequestDto request);
 }

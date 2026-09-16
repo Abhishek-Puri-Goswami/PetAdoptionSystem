@@ -26,6 +26,10 @@ public record PetResponseDto(
 
         EnergyLevel energyLevel,
 
-        Temperament temperament
+        Temperament temperament,
+
+        Long shelterId,
+
+        String shelterName
 ) {
 }

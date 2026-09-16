@@ -4,6 +4,8 @@ import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.entity.Shelter;
+import com.petadoption.entity.User;
 import com.petadoption.enums.EnergyLevel;
 import com.petadoption.enums.PetStatus;
 import com.petadoption.enums.Temperament;
@@ -13,8 +15,10 @@ import com.petadoption.mapper.PetMapper;
 import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.AppointmentRepository;
 import com.petadoption.repository.PetRepository;
+import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ImageStorageService;
+import com.petadoption.util.SecurityUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
@@ -57,12 +63,16 @@ class PetServiceImplTest {
     @Mock
     private ImageStorageService imageStorageService;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private PetServiceImpl petService;
 
     private Pet pet;
     private PetRequestDto requestDto;
     private PetResponseDto responseDto;
+    private User shelterAdmin;
 
     @BeforeEach
     void setUp() {
@@ -102,42 +112,92 @@ class PetServiceImplTest {
                         PetStatus.AVAILABLE,
                         null,
                         EnergyLevel.MEDIUM,
-                        Temperament.PLAYFUL
+                        Temperament.PLAYFUL,
+                        10L,
+                        "Happy Paws"
                 );
+
+        Shelter shelter = new Shelter();
+        shelter.setId(10L);
+        shelter.setName("Happy Paws");
+
+        shelterAdmin = new User();
+        shelterAdmin.setId(2L);
+        shelterAdmin.setEmail("admin@shelter.com");
+        shelterAdmin.setShelter(shelter);
     }
 
     @Test
     void shouldCreatePet() {
 
-        when(petMapper.toEntity(requestDto))
-                .thenReturn(pet);
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
 
-        when(petRepository.save(pet))
-                .thenReturn(pet);
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("admin@shelter.com");
 
-        when(petMapper.toResponseDto(pet))
-                .thenReturn(responseDto);
+            when(userRepository.findByEmail("admin@shelter.com"))
+                    .thenReturn(Optional.of(shelterAdmin));
 
-        PetResponseDto result =
-                petService.createPet(
-                        requestDto
-                );
+            when(petMapper.toEntity(requestDto))
+                    .thenReturn(pet);
 
-        assertNotNull(result);
+            when(petRepository.save(pet))
+                    .thenReturn(pet);
 
-        assertEquals(
-                1L,
-                result.id()
-        );
+            when(petMapper.toResponseDto(pet))
+                    .thenReturn(responseDto);
 
-        verify(auditLogService)
-                .saveAuditLog(
-                        anyString(),
-                        anyString(),
-                        anyString(),
-                        anyString(),
-                        anyString()
-                );
+            PetResponseDto result =
+                    petService.createPet(
+                            requestDto
+                    );
+
+            assertNotNull(result);
+
+            assertEquals(
+                    1L,
+                    result.id()
+            );
+
+            assertEquals(
+                    shelterAdmin.getShelter(),
+                    pet.getShelter()
+            );
+
+            verify(auditLogService)
+                    .saveAuditLog(
+                            anyString(),
+                            anyString(),
+                            anyString(),
+                            anyString(),
+                            anyString()
+                    );
+        }
+    }
+
+    @Test
+    void shouldThrowWhenCreatingPetWithoutShelterAssignment() {
+
+        shelterAdmin.setShelter(null);
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::getCurrentUserEmail)
+                    .thenReturn("admin@shelter.com");
+
+            when(userRepository.findByEmail("admin@shelter.com"))
+                    .thenReturn(Optional.of(shelterAdmin));
+
+            assertThrows(
+                    BusinessException.class,
+                    () -> petService.createPet(requestDto)
+            );
+
+            verify(petRepository, never())
+                    .save(any(Pet.class));
+        }
     }
 
     @Test

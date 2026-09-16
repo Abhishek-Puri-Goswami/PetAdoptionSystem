@@ -4,12 +4,14 @@ import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.entity.User;
 import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.PetMapper;
 import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.AppointmentRepository;
 import com.petadoption.repository.PetRepository;
+import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ImageStorageService;
 import com.petadoption.service.PetService;
@@ -33,11 +35,27 @@ public class PetServiceImpl implements PetService {
     private final AdoptionApplicationRepository adoptionApplicationRepository;
     private final AppointmentRepository appointmentRepository;
     private final ImageStorageService imageStorageService;
+    private final UserRepository userRepository;
 
     @Override
     public PetResponseDto createPet(PetRequestDto request) {
 
+        String email = SecurityUtil.getCurrentUserEmail();
+
+        User creator =
+                userRepository.findByEmail(email)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found"));
+
+        if (creator.getShelter() == null) {
+            throw new BusinessException(
+                    "You must be assigned to a shelter before "
+                            + "creating pets");
+        }
+
         Pet pet = petMapper.toEntity(request);
+        pet.setShelter(creator.getShelter());
 
         Pet savedPet = petRepository.save(pet);
 

@@ -1,15 +1,18 @@
 package com.petadoption.service.impl;
 
+import com.petadoption.dto.request.AssignShelterRequestDto;
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.entity.Role;
+import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
 import com.petadoption.enums.RoleType;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.UserMapper;
 import com.petadoption.repository.RoleRepository;
+import com.petadoption.repository.ShelterRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.UserService;
@@ -28,6 +31,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final ShelterRepository shelterRepository;
     private final UserMapper userMapper;
     private final AuditLogService auditLogService;
 
@@ -169,6 +173,47 @@ public class UserServiceImpl implements UserService {
                 String.valueOf(updated.getId()),
                 SecurityUtil.getCurrentUserEmail(),
                 "User updated their own profile");
+
+        return userMapper.toResponseDto(updated);
+    }
+
+    @Override
+    public UserResponseDto assignShelter(
+            Long userId,
+            AssignShelterRequestDto request) {
+
+        User user =
+                userRepository.findById(userId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found"));
+
+        if (request.shelterId() == null) {
+
+            user.setShelter(null);
+
+        } else {
+
+            Shelter shelter =
+                    shelterRepository.findById(request.shelterId())
+                            .orElseThrow(() ->
+                                    new ResourceNotFoundException(
+                                            "Shelter not found"));
+
+            user.setShelter(shelter);
+        }
+
+        User updated = userRepository.save(user);
+
+        auditLogService.saveAuditLog(
+                "USER_SHELTER_ASSIGNED",
+                "User",
+                String.valueOf(updated.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                request.shelterId() == null
+                        ? "User unassigned from shelter"
+                        : "User assigned to shelter "
+                                + request.shelterId());
 
         return userMapper.toResponseDto(updated);
     }

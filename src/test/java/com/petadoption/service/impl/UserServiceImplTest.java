@@ -1,15 +1,18 @@
 package com.petadoption.service.impl;
 
+import com.petadoption.dto.request.AssignShelterRequestDto;
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.entity.Role;
+import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
 import com.petadoption.enums.RoleType;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.UserMapper;
 import com.petadoption.repository.RoleRepository;
+import com.petadoption.repository.ShelterRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.util.SecurityUtil;
@@ -43,6 +46,9 @@ class UserServiceImplTest {
     private RoleRepository roleRepository;
 
     @Mock
+    private ShelterRepository shelterRepository;
+
+    @Mock
     private UserMapper userMapper;
 
     @Mock
@@ -69,7 +75,8 @@ class UserServiceImplTest {
                         "test@test.com",
                         true,
                         Set.of("ROLE_ADOPTER"),
-                        null, null, null, null, null, null, null);
+                        null, null, null, null, null, null, null,
+                        null, null);
 
         Pageable pageable = PageRequest.of(0, 20);
 
@@ -100,7 +107,8 @@ class UserServiceImplTest {
                         "test@test.com",
                         true,
                         Set.of("ROLE_ADOPTER"),
-                        null, null, null, null, null, null, null);
+                        null, null, null, null, null, null, null,
+                        null, null);
 
         when(userRepository.findById(1L))
                 .thenReturn(Optional.of(user));
@@ -149,7 +157,8 @@ class UserServiceImplTest {
                                 "test@test.com",
                                 false,
                                 Set.of("ROLE_ADOPTER"),
-                                null, null, null, null, null, null, null));
+                                null, null, null, null, null, null, null,
+                                null, null));
 
         userService.disableUser(1L);
 
@@ -187,7 +196,8 @@ class UserServiceImplTest {
                                 "test@test.com",
                                 true,
                                 Set.of("ROLE_ADOPTER"),
-                                null, null, null, null, null, null, null));
+                                null, null, null, null, null, null, null,
+                                null, null));
 
         userService.enableUser(1L);
 
@@ -235,7 +245,8 @@ class UserServiceImplTest {
                                 "test@test.com",
                                 true,
                                 Set.of("ROLE_SYSTEM_ADMIN"),
-                                null, null, null, null, null, null, null));
+                                null, null, null, null, null, null, null,
+                                null, null));
 
         UserResponseDto result =
                 userService.updateRoles(
@@ -269,7 +280,8 @@ class UserServiceImplTest {
                         "test@test.com",
                         true,
                         Set.of("ROLE_ADOPTER"),
-                        null, null, null, null, null, null, null);
+                        null, null, null, null, null, null, null,
+                        null, null);
 
         try (MockedStatic<SecurityUtil> mocked =
                      Mockito.mockStatic(SecurityUtil.class)) {
@@ -337,7 +349,9 @@ class UserServiceImplTest {
                                     "Bangalore",
                                     "Karnataka",
                                     "560001",
-                                    "India"));
+                                    "India",
+                                    null,
+                                    null));
 
             UserResponseDto result =
                     userService.updateMyProfile(request);
@@ -375,5 +389,106 @@ class UserServiceImplTest {
                     .isInstanceOf(
                             ResourceNotFoundException.class);
         }
+    }
+
+    @Test
+    void shouldAssignShelterToUser() {
+
+        User user = new User();
+        user.setId(1L);
+
+        Shelter shelter = new Shelter();
+        shelter.setId(10L);
+        shelter.setName("Happy Paws");
+
+        AssignShelterRequestDto request =
+                new AssignShelterRequestDto(10L);
+
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.of(user));
+
+        when(shelterRepository.findById(10L))
+                .thenReturn(Optional.of(shelter));
+
+        when(userRepository.save(any(User.class)))
+                .thenReturn(user);
+
+        when(userMapper.toResponseDto(user))
+                .thenReturn(
+                        new UserResponseDto(
+                                1L, "A", "B", "a@test.com", true,
+                                Set.of("ROLE_SHELTER_ADMIN"),
+                                null, null, null, null, null, null, null,
+                                10L, "Happy Paws"));
+
+        UserResponseDto result =
+                userService.assignShelter(1L, request);
+
+        assertThat(user.getShelter())
+                .isEqualTo(shelter);
+
+        assertThat(result.shelterId())
+                .isEqualTo(10L);
+
+        verify(auditLogService)
+                .saveAuditLog(
+                        eq("USER_SHELTER_ASSIGNED"),
+                        any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldUnassignShelterFromUser() {
+
+        Shelter shelter = new Shelter();
+        shelter.setId(10L);
+
+        User user = new User();
+        user.setId(1L);
+        user.setShelter(shelter);
+
+        AssignShelterRequestDto request =
+                new AssignShelterRequestDto(null);
+
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.of(user));
+
+        when(userRepository.save(any(User.class)))
+                .thenReturn(user);
+
+        when(userMapper.toResponseDto(user))
+                .thenReturn(
+                        new UserResponseDto(
+                                1L, "A", "B", "a@test.com", true,
+                                Set.of("ROLE_SHELTER_ADMIN"),
+                                null, null, null, null, null, null, null,
+                                null, null));
+
+        userService.assignShelter(1L, request);
+
+        assertThat(user.getShelter())
+                .isNull();
+
+        verify(shelterRepository, never())
+                .findById(any());
+    }
+
+    @Test
+    void shouldThrowWhenAssigningNonExistentShelter() {
+
+        User user = new User();
+        user.setId(1L);
+
+        AssignShelterRequestDto request =
+                new AssignShelterRequestDto(999L);
+
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.of(user));
+
+        when(shelterRepository.findById(999L))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                userService.assignShelter(1L, request))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

@@ -2,6 +2,7 @@ package com.petadoption.mapper;
 
 import com.petadoption.dto.response.UserResponseDto;
 import com.petadoption.entity.Role;
+import com.petadoption.entity.Shelter;
 import com.petadoption.entity.User;
 import com.petadoption.enums.RoleType;
 
@@ -47,6 +48,11 @@ class UserMapperTest {
         user.setRoles(
                 Set.of(role1, role2)
         );
+
+        Shelter shelter = new Shelter();
+        shelter.setId(7L);
+        shelter.setName("Happy Paws");
+        user.setShelter(shelter);
 
         UserResponseDto dto =
                 mapper.toResponseDto(
@@ -95,6 +101,29 @@ class UserMapperTest {
                         "ROLE_ADOPTER"
                 )
         );
+
+        assertEquals(
+                7L,
+                dto.shelterId()
+        );
+
+        assertEquals(
+                "Happy Paws",
+                dto.shelterName()
+        );
+    }
+
+    @Test
+    void shouldMapNullShelterToNullShelterFields() {
+
+        User user = new User();
+        user.setId(2L);
+        user.setRoles(Set.of());
+
+        UserResponseDto dto = mapper.toResponseDto(user);
+
+        assertNull(dto.shelterId());
+        assertNull(dto.shelterName());
     }
 
     @Test

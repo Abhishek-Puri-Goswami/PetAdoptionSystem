@@ -1,5 +1,6 @@
 package com.petadoption.controller;
 
+import com.petadoption.dto.request.AssignShelterRequestDto;
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.ApiResponseDto;
@@ -93,5 +94,16 @@ public class UserController {
                 true,
                 "User enabled successfully",
                 userService.enableUser(id));
+    }
+
+    @PutMapping("/{id}/shelter")
+    public ApiResponseDto<UserResponseDto> assignShelter(
+            @PathVariable Long id,
+            @RequestBody AssignShelterRequestDto request) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Shelter assignment updated successfully",
+                userService.assignShelter(id, request));
     }
 }

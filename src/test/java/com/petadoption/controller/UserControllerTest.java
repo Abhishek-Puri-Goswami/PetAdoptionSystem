@@ -1,6 +1,7 @@
 package com.petadoption.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petadoption.dto.request.AssignShelterRequestDto;
 import com.petadoption.dto.request.UpdateProfileRequestDto;
 import com.petadoption.dto.request.UpdateUserRoleRequestDto;
 import com.petadoption.dto.response.PageResponseDto;
@@ -53,6 +54,8 @@ class UserControllerTest {
                 "test@test.com",
                 true,
                 Set.of("ROLE_ADOPTER"),
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -193,5 +196,29 @@ class UserControllerTest {
                         jsonPath("$.message")
                                 .value(
                                         "User enabled successfully"));
+    }
+
+    @Test
+    void shouldAssignShelter() throws Exception {
+
+        AssignShelterRequestDto request =
+                new AssignShelterRequestDto(10L);
+
+        when(userService.assignShelter(any(), any()))
+                .thenReturn(buildUser());
+
+        mockMvc.perform(
+                        put("/api/users/1/shelter")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                request)))
+                .andExpect(status().isOk())
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "Shelter assignment updated "
+                                                + "successfully"));
     }
 }

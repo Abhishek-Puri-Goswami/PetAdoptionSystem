@@ -47,6 +47,10 @@ public class User extends BaseEntity {
 
     private String country;
 
+    @ManyToOne
+    @JoinColumn(name = "shelter_id")
+    private Shelter shelter;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

@@ -15,5 +15,7 @@ public interface UserMapper {
                             ".stream()" +
                             ".map(role -> role.getName().name())" +
                             ".collect(java.util.stream.Collectors.toSet()))")
+    @Mapping(target = "shelterId", source = "shelter.id")
+    @Mapping(target = "shelterName", source = "shelter.name")
     UserResponseDto toResponseDto(User user);
 }

@@ -3,6 +3,7 @@ package com.petadoption.mapper;
 import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.entity.Shelter;
 import com.petadoption.enums.EnergyLevel;
 import com.petadoption.enums.PetStatus;
 import com.petadoption.enums.Temperament;
@@ -98,6 +99,11 @@ class PetMapperTest {
         pet.setEnergyLevel(EnergyLevel.HIGH);
         pet.setTemperament(Temperament.AFFECTIONATE);
 
+        Shelter shelter = new Shelter();
+        shelter.setId(5L);
+        shelter.setName("Happy Paws");
+        pet.setShelter(shelter);
+
         PetResponseDto dto =
                 mapper.toResponseDto(pet);
 
@@ -157,5 +163,28 @@ class PetMapperTest {
                 Temperament.AFFECTIONATE,
                 dto.temperament()
         );
+
+        assertEquals(
+                5L,
+                dto.shelterId()
+        );
+
+        assertEquals(
+                "Happy Paws",
+                dto.shelterName()
+        );
+    }
+
+    @Test
+    void shouldMapNullShelterToNullShelterFields() {
+
+        Pet pet = new Pet();
+        pet.setId(2L);
+        pet.setName("Solo");
+
+        PetResponseDto dto = mapper.toResponseDto(pet);
+
+        assertNull(dto.shelterId());
+        assertNull(dto.shelterName());
     }
 }

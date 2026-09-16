@@ -28,6 +28,10 @@ public record UserResponseDto(
 
         String postalCode,
 
-        String country
+        String country,
+
+        Long shelterId,
+
+        String shelterName
 ) {
 }
