@@ -1,5 +1,6 @@
 package com.petadoption.service.impl;
 
+import com.petadoption.dto.request.AdoptionDecisionRequestDto;
 import com.petadoption.dto.request.AdoptionRequestDto;
 import com.petadoption.dto.response.AdoptionResponseDto;
 import com.petadoption.dto.response.PageResponseDto;
@@ -18,6 +19,7 @@ import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AdoptionService;
+import com.petadoption.service.AppNotificationService;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ShelterScopeService;
 import com.petadoption.util.SecurityUtil;
@@ -40,6 +42,7 @@ public class AdoptionServiceImpl implements AdoptionService {
     private final EmailService emailService;
     private final AuditLogService auditLogService;
     private final ShelterScopeService shelterScopeService;
+    private final AppNotificationService appNotificationService;
 
     private static final List<ApplicationStatus> ACTIVE_STATUSES =
             List.of(ApplicationStatus.PENDING,
@@ -82,6 +85,14 @@ public class AdoptionServiceImpl implements AdoptionService {
         application.setAdopter(adopter);
         application.setApplicantNotes(
                 request.applicantNotes());
+        application.setLivingSituation(
+                request.livingSituation());
+        application.setPriorPetExperience(
+                request.priorPetExperience());
+        application.setHouseholdDetails(
+                request.householdDetails());
+        application.setPreferredContact(
+                request.preferredContact());
         AdoptionApplication saved =
                 adoptionRepository.save(application);
 
@@ -184,7 +195,8 @@ public class AdoptionServiceImpl implements AdoptionService {
 
     @Override
     @Transactional
-    public AdoptionResponseDto approveApplication(Long id) {
+    public AdoptionResponseDto approveApplication(
+            Long id, AdoptionDecisionRequestDto decision) {
 
         AdoptionApplication application =
                 adoptionRepository.findById(id)
@@ -204,6 +216,8 @@ public class AdoptionServiceImpl implements AdoptionService {
         }
 
         application.setStatus(ApplicationStatus.APPROVED);
+        application.setReviewNotes(
+                decision != null ? decision.notes() : null);
         pet.setStatus(PetStatus.ADOPTED);
 
         petRepository.save(pet);
@@ -238,6 +252,13 @@ public class AdoptionServiceImpl implements AdoptionService {
                     EmailTemplateBuilder.adoptionRejected(
                             other.getAdopter().getFirstName())
             );
+
+            appNotificationService.notify(
+                    other.getAdopter(),
+                    "Your adoption application for "
+                            + pet.getName()
+                            + " was auto-rejected because the pet was "
+                            + "adopted via another application.");
         }
 
         auditLogService.saveAuditLog(
@@ -255,11 +276,18 @@ public class AdoptionServiceImpl implements AdoptionService {
                                 .getFirstName())
         );
 
+        appNotificationService.notify(
+                application.getAdopter(),
+                "Your adoption application for "
+                        + pet.getName()
+                        + " has been approved!");
+
         return adoptionMapper.toResponseDto(updated);
     }
 
     @Override
-    public AdoptionResponseDto rejectApplication(Long id) {
+    public AdoptionResponseDto rejectApplication(
+            Long id, AdoptionDecisionRequestDto decision) {
 
         AdoptionApplication application =
                 adoptionRepository.findById(id)
@@ -272,6 +300,8 @@ public class AdoptionServiceImpl implements AdoptionService {
                 shelterIdOf(application.getPet()));
 
         application.setStatus(ApplicationStatus.REJECTED);
+        application.setRejectionReason(
+                decision != null ? decision.notes() : null);
 
         AdoptionApplication updated =
                 adoptionRepository.save(application);
@@ -290,6 +320,12 @@ public class AdoptionServiceImpl implements AdoptionService {
                         application.getAdopter()
                                 .getFirstName())
         );
+
+        appNotificationService.notify(
+                application.getAdopter(),
+                "Your adoption application for "
+                        + application.getPet().getName()
+                        + " was not approved.");
 
         return adoptionMapper.toResponseDto(updated);
     }

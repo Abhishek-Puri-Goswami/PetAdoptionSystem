@@ -1,5 +1,6 @@
 package com.petadoption.controller;
 
+import com.petadoption.dto.request.AdoptionDecisionRequestDto;
 import com.petadoption.dto.request.AdoptionRequestDto;
 import com.petadoption.dto.response.AdoptionResponseDto;
 import com.petadoption.dto.response.ApiResponseDto;
@@ -89,24 +90,30 @@ public class AdoptionController {
     @PreAuthorize("hasRole('SHELTER_ADMIN')")
     @PutMapping("/{id}/approve")
     public ApiResponseDto<AdoptionResponseDto>
-    approveApplication(@PathVariable Long id) {
+    approveApplication(
+            @PathVariable Long id,
+            @RequestBody(required = false)
+            AdoptionDecisionRequestDto decision) {
 
         return new ApiResponseDto<>(
                 true,
                 "Application approved successfully",
-                adoptionService.approveApplication(id)
+                adoptionService.approveApplication(id, decision)
         );
     }
 
     @PreAuthorize("hasRole('SHELTER_ADMIN')")
     @PutMapping("/{id}/reject")
     public ApiResponseDto<AdoptionResponseDto>
-    rejectApplication(@PathVariable Long id) {
+    rejectApplication(
+            @PathVariable Long id,
+            @RequestBody(required = false)
+            AdoptionDecisionRequestDto decision) {
 
         return new ApiResponseDto<>(
                 true,
                 "Application rejected successfully",
-                adoptionService.rejectApplication(id)
+                adoptionService.rejectApplication(id, decision)
         );
     }
 }

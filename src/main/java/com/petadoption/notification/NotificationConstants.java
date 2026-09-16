@@ -22,4 +22,7 @@ public final class NotificationConstants {
 
     public static final String APPOINTMENT_COMPLETED_SUBJECT =
             "Appointment Completed";
+
+    public static final String PASSWORD_RESET_SUBJECT =
+            "Password Reset Request";
 }

@@ -96,6 +96,27 @@ public final class EmailTemplateBuilder {
                 .formatted(firstName, petName);
     }
 
+    public static String passwordReset(
+            String firstName,
+            String token) {
+
+        return """
+            Hello %s,
+
+            We received a request to reset your password.
+
+            Use this token to reset your password:
+            %s
+
+            This token expires in 1 hour. If you did not
+            request a password reset, you can ignore this email.
+
+            Regards,
+            Pet Adoption Team
+            """
+                .formatted(firstName, token);
+    }
+
     public static String appointmentCompleted(
             String firstName,
             String petName) {

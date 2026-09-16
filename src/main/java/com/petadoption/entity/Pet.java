@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "pets")
 @Getter
@@ -46,7 +49,15 @@ public class Pet extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Temperament temperament;
 
+    private boolean sterilized;
+
+    @Column(length = 1000)
+    private String specialCareNotes;
+
     @ManyToOne
     @JoinColumn(name = "shelter_id")
     private Shelter shelter;
+
+    @OneToMany(mappedBy = "pet")
+    private List<PetImage> images = new ArrayList<>();
 }

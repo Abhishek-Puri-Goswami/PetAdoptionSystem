@@ -20,6 +20,7 @@ import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AppointmentService;
 
+import com.petadoption.service.AppNotificationService;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ShelterScopeService;
 import com.petadoption.util.SecurityUtil;
@@ -42,6 +43,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final EmailService emailService;
     private final AuditLogService auditLogService;
     private final ShelterScopeService shelterScopeService;
+    private final AppNotificationService appNotificationService;
 
     @Override
     @Transactional
@@ -246,6 +248,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                         appointment.getPet().getName())
         );
 
+        appNotificationService.notify(
+                appointment.getAdopter(),
+                "Your appointment for "
+                        + appointment.getPet().getName()
+                        + " has been approved.");
+
         return appointmentMapper.toResponseDto(updated);
     }
 
@@ -305,6 +313,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                         appointment.getPet().getName())
         );
 
+        appNotificationService.notify(
+                appointment.getAdopter(),
+                "Your appointment for "
+                        + appointment.getPet().getName()
+                        + " was rejected.");
+
         return appointmentMapper.toResponseDto(updated);
     }
 
@@ -341,6 +355,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                         appointment.getAdopter().getFirstName(),
                         appointment.getPet().getName())
         );
+
+        appNotificationService.notify(
+                appointment.getAdopter(),
+                "Your appointment for "
+                        + appointment.getPet().getName()
+                        + " is marked completed.");
 
         return appointmentMapper.toResponseDto(updated);
     }

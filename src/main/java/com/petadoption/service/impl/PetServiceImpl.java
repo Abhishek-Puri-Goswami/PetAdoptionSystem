@@ -1,16 +1,20 @@
 package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.PetRequestDto;
+import com.petadoption.dto.request.PetSearchCriteria;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.entity.PetImage;
 import com.petadoption.entity.User;
 import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.PetMapper;
 import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.AppointmentRepository;
+import com.petadoption.repository.PetImageRepository;
 import com.petadoption.repository.PetRepository;
+import com.petadoption.repository.PetSpecification;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ImageStorageService;
@@ -36,6 +40,7 @@ public class PetServiceImpl implements PetService {
     private final AppointmentRepository appointmentRepository;
     private final ImageStorageService imageStorageService;
     private final UserRepository userRepository;
+    private final PetImageRepository petImageRepository;
 
     @Override
     public PetResponseDto createPet(PetRequestDto request) {
@@ -70,10 +75,13 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public PageResponseDto<PetResponseDto> getAllPets(Pageable pageable) {
+    public PageResponseDto<PetResponseDto> getAllPets(
+            Pageable pageable, PetSearchCriteria criteria) {
 
         Page<PetResponseDto> page =
-                petRepository.findAll(pageable)
+                petRepository.findAll(
+                                PetSpecification.fromCriteria(criteria),
+                                pageable)
                         .map(petMapper::toResponseDto);
 
         return PageResponseDto.from(page);
@@ -110,6 +118,8 @@ public class PetServiceImpl implements PetService {
         pet.setDescription(request.description());
         pet.setEnergyLevel(request.energyLevel());
         pet.setTemperament(request.temperament());
+        pet.setSterilized(request.sterilized());
+        pet.setSpecialCareNotes(request.specialCareNotes());
 
         Pet updatedPet =
                 petRepository.save(pet);
@@ -198,5 +208,52 @@ public class PetServiceImpl implements PetService {
                 "Pet image uploaded/replaced");
 
         return petMapper.toResponseDto(updatedPet);
+    }
+
+    @Override
+    public PetResponseDto addPetGalleryImage(
+            Long id, MultipartFile file) {
+
+        Pet pet =
+                petRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Pet not found"));
+
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("Image file is required");
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BusinessException(
+                    "Only image files are allowed");
+        }
+
+        ImageStorageService.ImageUploadResult result =
+                imageStorageService.uploadImage(file, PET_IMAGE_FOLDER);
+
+        PetImage image = new PetImage();
+        image.setPet(pet);
+        image.setImageUrl(result.url());
+        image.setImagePublicId(result.publicId());
+
+        petImageRepository.save(image);
+
+        auditLogService.saveAuditLog(
+                "PET_GALLERY_IMAGE_ADDED",
+                "Pet",
+                String.valueOf(pet.getId()),
+                SecurityUtil.getCurrentUserEmail(),
+                "Pet gallery image added");
+
+        Pet refreshed =
+                petRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Pet not found"));
+
+        return petMapper.toResponseDto(refreshed);
     }
 }

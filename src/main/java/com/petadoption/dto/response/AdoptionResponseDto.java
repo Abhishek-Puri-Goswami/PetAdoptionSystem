@@ -16,6 +16,18 @@ public record AdoptionResponseDto(
 
         String applicantNotes,
 
+        String livingSituation,
+
+        String priorPetExperience,
+
+        String householdDetails,
+
+        String preferredContact,
+
+        String reviewNotes,
+
+        String rejectionReason,
+
         ApplicationStatus status
 ) {
 }

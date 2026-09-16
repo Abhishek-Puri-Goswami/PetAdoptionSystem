@@ -1,8 +1,11 @@
 package com.petadoption.service.impl;
 
+import com.petadoption.dto.request.ForgotPasswordRequestDto;
 import com.petadoption.dto.request.LoginRequestDto;
 import com.petadoption.dto.request.RegisterRequestDto;
+import com.petadoption.dto.request.ResetPasswordRequestDto;
 import com.petadoption.dto.response.AuthResponseDto;
+import com.petadoption.entity.PasswordResetToken;
 import com.petadoption.entity.Role;
 import com.petadoption.entity.User;
 import com.petadoption.enums.RoleType;
@@ -10,6 +13,7 @@ import com.petadoption.exception.BusinessException;
 import com.petadoption.notification.EmailService;
 import com.petadoption.notification.EmailTemplateBuilder;
 import com.petadoption.notification.NotificationConstants;
+import com.petadoption.repository.PasswordResetTokenRepository;
 import com.petadoption.repository.RoleRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.security.JwtService;
@@ -18,6 +22,9 @@ import com.petadoption.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final AuditLogService auditLogService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Override
     public AuthResponseDto register(RegisterRequestDto request) {
@@ -118,5 +126,79 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .token(token)
                 .build();
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequestDto request) {
+
+        userRepository.findByEmail(request.email())
+                .ifPresent(user -> {
+
+                    String token = UUID.randomUUID().toString();
+
+                    PasswordResetToken resetToken =
+                            new PasswordResetToken();
+
+                    resetToken.setUser(user);
+                    resetToken.setToken(token);
+                    resetToken.setExpiresAt(
+                            LocalDateTime.now().plusHours(1));
+
+                    passwordResetTokenRepository.save(resetToken);
+
+                    emailService.sendEmail(
+                            user.getEmail(),
+                            NotificationConstants
+                                    .PASSWORD_RESET_SUBJECT,
+                            EmailTemplateBuilder.passwordReset(
+                                    user.getFirstName(), token)
+                    );
+
+                    auditLogService.saveAuditLog(
+                            "PASSWORD_RESET_REQUESTED",
+                            "User",
+                            String.valueOf(user.getId()),
+                            user.getEmail(),
+                            "Password reset requested");
+                });
+
+        // Always return silently, whether or not the email
+        // exists - avoids leaking which emails are registered.
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequestDto request) {
+
+        PasswordResetToken resetToken =
+                passwordResetTokenRepository
+                        .findByToken(request.token())
+                        .orElseThrow(() ->
+                                new BusinessException(
+                                        "Invalid or expired reset token"));
+
+        if (resetToken.getExpiresAt()
+                .isBefore(LocalDateTime.now())) {
+
+            passwordResetTokenRepository.delete(resetToken);
+
+            throw new BusinessException(
+                    "Invalid or expired reset token");
+        }
+
+        User user = resetToken.getUser();
+
+        user.setPassword(
+                passwordEncoder.encode(request.newPassword()));
+
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
+
+        auditLogService.saveAuditLog(
+                "PASSWORD_RESET_COMPLETED",
+                "User",
+                String.valueOf(user.getId()),
+                user.getEmail(),
+                "Password reset completed");
     }
 }

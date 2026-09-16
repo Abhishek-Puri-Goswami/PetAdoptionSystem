@@ -7,6 +7,14 @@ public record AdoptionRequestDto(
         @NotNull
         Long petId,
 
-        String applicantNotes
+        String applicantNotes,
+
+        String livingSituation,
+
+        String priorPetExperience,
+
+        String householdDetails,
+
+        String preferredContact
 ) {
 }

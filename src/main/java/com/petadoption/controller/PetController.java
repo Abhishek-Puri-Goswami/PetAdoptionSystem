@@ -1,9 +1,13 @@
 package com.petadoption.controller;
 
 import com.petadoption.dto.request.PetRequestDto;
+import com.petadoption.dto.request.PetSearchCriteria;
 import com.petadoption.dto.response.ApiResponseDto;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
+import com.petadoption.enums.EnergyLevel;
+import com.petadoption.enums.PetStatus;
+import com.petadoption.enums.Temperament;
 import com.petadoption.service.PetService;
 
 import jakarta.validation.Valid;
@@ -39,12 +43,23 @@ public class PetController {
             "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
     @GetMapping
     public ApiResponseDto<PageResponseDto<PetResponseDto>> getAllPets(
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20) Pageable pageable,
+            @RequestParam(required = false) String species,
+            @RequestParam(required = false) EnergyLevel energyLevel,
+            @RequestParam(required = false) Temperament temperament,
+            @RequestParam(required = false) Integer minAge,
+            @RequestParam(required = false) Integer maxAge,
+            @RequestParam(required = false) PetStatus status,
+            @RequestParam(required = false) String search) {
+
+        PetSearchCriteria criteria = new PetSearchCriteria(
+                species, energyLevel, temperament,
+                minAge, maxAge, status, search);
 
         return new ApiResponseDto<>(
                 true,
                 "Pets fetched successfully",
-                petService.getAllPets(pageable)
+                petService.getAllPets(pageable, criteria)
         );
     }
 
@@ -100,6 +115,21 @@ public class PetController {
                 true,
                 "Pet image uploaded successfully",
                 petService.uploadPetImage(id, file)
+        );
+    }
+
+    @PreAuthorize("hasRole('SHELTER_ADMIN')")
+    @PostMapping(
+            value = "/{id}/images",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponseDto<PetResponseDto> addPetGalleryImage(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Pet gallery image added successfully",
+                petService.addPetGalleryImage(id, file)
         );
     }
 }

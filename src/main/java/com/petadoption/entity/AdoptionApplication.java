@@ -20,6 +20,23 @@ public class AdoptionApplication extends BaseEntity {
     @Column(length = 2000)
     private String applicantNotes;
 
+    @Column(length = 1000)
+    private String livingSituation;
+
+    @Column(length = 1000)
+    private String priorPetExperience;
+
+    @Column(length = 1000)
+    private String householdDetails;
+
+    private String preferredContact;
+
+    @Column(length = 1000)
+    private String reviewNotes;
+
+    @Column(length = 1000)
+    private String rejectionReason;
+
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status = ApplicationStatus.PENDING;
 

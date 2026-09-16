@@ -1,5 +1,6 @@
 package com.petadoption.service;
 
+import com.petadoption.dto.request.AdoptionDecisionRequestDto;
 import com.petadoption.dto.request.AdoptionRequestDto;
 import com.petadoption.dto.response.AdoptionResponseDto;
 import com.petadoption.dto.response.PageResponseDto;
@@ -21,8 +22,10 @@ public interface AdoptionService {
 
     AdoptionResponseDto getApplicationById(Long id);
 
-    AdoptionResponseDto approveApplication(Long id);
+    AdoptionResponseDto approveApplication(
+            Long id, AdoptionDecisionRequestDto decision);
 
-    AdoptionResponseDto rejectApplication(Long id);
+    AdoptionResponseDto rejectApplication(
+            Long id, AdoptionDecisionRequestDto decision);
 
 }

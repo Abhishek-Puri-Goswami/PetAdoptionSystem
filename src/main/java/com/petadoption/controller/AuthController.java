@@ -1,7 +1,9 @@
 package com.petadoption.controller;
 
+import com.petadoption.dto.request.ForgotPasswordRequestDto;
 import com.petadoption.dto.request.LoginRequestDto;
 import com.petadoption.dto.request.RegisterRequestDto;
+import com.petadoption.dto.request.ResetPasswordRequestDto;
 import com.petadoption.dto.response.ApiResponseDto;
 import com.petadoption.dto.response.AuthResponseDto;
 import com.petadoption.service.AuthService;
@@ -35,6 +37,33 @@ public class AuthController {
                 true,
                 "Login successful",
                 authService.login(request)
+        );
+    }
+
+    @PostMapping("/forgot-password")
+    public ApiResponseDto<String> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDto request) {
+
+        authService.forgotPassword(request);
+
+        return new ApiResponseDto<>(
+                true,
+                "If that email is registered, a reset link has "
+                        + "been sent",
+                null
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponseDto<String> resetPassword(
+            @Valid @RequestBody ResetPasswordRequestDto request) {
+
+        authService.resetPassword(request);
+
+        return new ApiResponseDto<>(
+                true,
+                "Password reset successfully",
+                null
         );
     }
 }

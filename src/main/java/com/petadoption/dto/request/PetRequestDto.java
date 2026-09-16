@@ -23,6 +23,10 @@ public record PetRequestDto(
 
         EnergyLevel energyLevel,
 
-        Temperament temperament
+        Temperament temperament,
+
+        boolean sterilized,
+
+        String specialCareNotes
 ) {
 }
