@@ -40,7 +40,8 @@ class PetSearchToolsTest {
                 .thenReturn(List.of(pet));
 
         List<PetSummary> result =
-                petSearchTools.searchAvailablePets("Dog", null);
+                petSearchTools.searchAvailablePets(
+                        "Dog", null, null, null);
 
         assertEquals(1, result.size());
         assertEquals("Buddy", result.get(0).name());
@@ -64,7 +65,8 @@ class PetSearchToolsTest {
                 .thenReturn(elevenPets);
 
         List<PetSummary> result =
-                petSearchTools.searchAvailablePets(null, null);
+                petSearchTools.searchAvailablePets(
+                        null, null, null, null);
 
         assertEquals(10, result.size());
     }

@@ -2301,6 +2301,29 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cv4genai0chatcare0req0003c"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"message\": \"I live in an apartment and want a calm, low-energy dog. What do you have?\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Pet Matching Chat",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/ai/chat/match",
+          "responses": {},
+          "testScript": "",
+          "description": "Phase 3b: Pet Matching Agent - searches only AVAILABLE pets (species/energyLevel/temperament/free-text) and remembers the last 20 messages per user (conversation ID = your own email), so follow-up questions like 'what was her breed again?' work without repeating context.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv7genai0chatmatch0req001"
         }
       ],
       "auth": {

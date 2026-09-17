@@ -2,7 +2,9 @@ package com.petadoption.ai.tool;
 
 import com.petadoption.dto.request.PetSearchCriteria;
 import com.petadoption.entity.Pet;
+import com.petadoption.enums.EnergyLevel;
 import com.petadoption.enums.PetStatus;
+import com.petadoption.enums.Temperament;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.PetSpecification;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +35,23 @@ public class PetSearchTools {
             String species,
 
             @ToolParam(required = false,
+                    description = "Energy level to filter by: LOW, "
+                            + "MEDIUM, or HIGH")
+            EnergyLevel energyLevel,
+
+            @ToolParam(required = false,
+                    description = "Temperament to filter by: CALM, "
+                            + "PLAYFUL, INDEPENDENT, AFFECTIONATE, or "
+                            + "PROTECTIVE")
+            Temperament temperament,
+
+            @ToolParam(required = false,
                     description = "Free-text search over breed, name, "
                             + "or description")
             String search) {
 
         PetSearchCriteria criteria = new PetSearchCriteria(
-                species, null, null, null, null,
+                species, energyLevel, temperament, null, null,
                 PetStatus.AVAILABLE, search);
 
         return petRepository
