@@ -3,6 +3,7 @@ package com.petadoption.ai.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.dto.ChatRequestDto;
+import com.petadoption.ai.tool.PetSearchTools;
 import com.petadoption.security.JwtAuthenticationFilter;
 
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,9 @@ class AiChatControllerTest {
 
     @MockitoBean
     private PetCareAdvisorService petCareAdvisorService;
+
+    @MockitoBean
+    private PetSearchTools petSearchTools;
 
     @Test
     void shouldReturnAiReply() throws Exception {
@@ -106,6 +110,31 @@ class AiChatControllerTest {
                                         objectMapper.writeValueAsString(
                                                 request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnToolTestReply() throws Exception {
+
+        ChatRequestDto request =
+                new ChatRequestDto("Find me an available dog");
+
+        when(chatClient.prompt()
+                .tools(petSearchTools)
+                .user("Find me an available dog")
+                .call()
+                .content())
+                .thenReturn("I found Buddy, an available Labrador.");
+
+        mockMvc.perform(
+                        post("/api/ai/chat/tool-test")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.reply")
+                        .value("I found Buddy, an available Labrador."));
     }
 
     @Test

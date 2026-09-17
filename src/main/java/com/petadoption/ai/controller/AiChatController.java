@@ -3,6 +3,7 @@ package com.petadoption.ai.controller;
 import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.dto.ChatRequestDto;
 import com.petadoption.ai.dto.ChatResponseDto;
+import com.petadoption.ai.tool.PetSearchTools;
 import com.petadoption.dto.response.ApiResponseDto;
 import com.petadoption.exception.AiServiceException;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ public class AiChatController {
 
     private final ChatClient chatClient;
     private final PetCareAdvisorService petCareAdvisorService;
+    private final PetSearchTools petSearchTools;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/ping")
@@ -41,6 +43,37 @@ public class AiChatController {
         } catch (Exception ex) {
 
             log.error("AI chat call failed", ex);
+
+            throw new AiServiceException(
+                    "AI service is currently unavailable. "
+                            + "Please try again later.");
+        }
+
+        return new ApiResponseDto<>(
+                true,
+                "AI responded successfully",
+                new ChatResponseDto(reply)
+        );
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/chat/tool-test")
+    public ApiResponseDto<ChatResponseDto> toolTest(
+            @Valid @RequestBody ChatRequestDto request) {
+
+        String reply;
+
+        try {
+
+            reply = chatClient.prompt()
+                    .tools(petSearchTools)
+                    .user(request.message())
+                    .call()
+                    .content();
+
+        } catch (Exception ex) {
+
+            log.error("AI tool-calling test failed", ex);
 
             throw new AiServiceException(
                     "AI service is currently unavailable. "
