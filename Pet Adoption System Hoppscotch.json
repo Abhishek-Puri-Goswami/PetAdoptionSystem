@@ -52,6 +52,94 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cmtr2ysyt0hnihh1iflzeqdyr"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Browse Pets (public, no login)",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/pets",
+          "responses": {},
+          "testScript": "",
+          "description": "Public since the backlog batch (2026-09-19). Anonymous callers ONLY ever see AVAILABLE pets - a status filter for other statuses is ignored. Logged-in users see all statuses as before. Filters/sort/paging work as documented on 'Get All Pets'. Do NOT send an expired/garbage Authorization header: it returns 401 even on public routes.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv10pub0browsepets0req001"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Get Pet by Id (public, no login)",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/pets/3",
+          "responses": {},
+          "testScript": "",
+          "description": "Public. Returns 404 for a pet that is not AVAILABLE when the caller is anonymous (same answer as a missing pet). /api/pets/{id}/medical-records and every other sub-route stay protected.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv10pub0getpet0req0002"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Browse Shelters (public, no login)",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/shelters",
+          "responses": {},
+          "testScript": "",
+          "description": "Public. Paginated list with optional ?name= search.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv10pub0browseshel0req003"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "body": null,
+            "contentType": null
+          },
+          "name": "Get Shelter by Id (public, no login)",
+          "method": "GET",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/shelters/1",
+          "responses": {},
+          "testScript": "",
+          "description": "Public.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv10pub0getshelter0req004"
         }
       ],
       "auth": {

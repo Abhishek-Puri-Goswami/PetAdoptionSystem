@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -57,6 +58,15 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/"
+                        ).permitAll()
+                        // Public browsing: exactly these GET routes.
+                        // "{id}" matches one segment only, so
+                        // /api/pets/{id}/medical-records stays protected.
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/pets",
+                                "/api/pets/{id}",
+                                "/api/shelters",
+                                "/api/shelters/{id}"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

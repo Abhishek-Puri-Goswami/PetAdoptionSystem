@@ -39,8 +39,7 @@ public class PetController {
         );
     }
 
-    @PreAuthorize(
-            "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
+    // Public (anonymous allowed): see SecurityConfig.
     @GetMapping
     public ApiResponseDto<PageResponseDto<PetResponseDto>> getAllPets(
             @PageableDefault(size = 20) Pageable pageable,
@@ -63,8 +62,7 @@ public class PetController {
         );
     }
 
-    @PreAuthorize(
-            "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
+    // Public (anonymous allowed): see SecurityConfig.
     @GetMapping("/{id}")
     public ApiResponseDto<PetResponseDto> getPetById(
             @PathVariable Long id) {

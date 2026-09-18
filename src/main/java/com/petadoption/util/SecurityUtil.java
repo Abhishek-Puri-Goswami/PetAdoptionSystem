@@ -8,6 +8,18 @@ public final class SecurityUtil {
     private SecurityUtil() {
     }
 
+    public static boolean isAnonymous() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        return authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal());
+    }
+
     public static String getCurrentUserEmail() {
 
         Authentication authentication =

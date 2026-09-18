@@ -209,6 +209,80 @@ class PetServiceImplTest {
         }
     }
 
+    private static final com.petadoption.dto.request.PetSearchCriteria
+            EMPTY_CRITERIA = new com.petadoption.dto.request
+            .PetSearchCriteria(null, null, null, null, null, null, null);
+
+    @Test
+    void shouldForceAvailableStatusForAnonymousVisitors() {
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::isAnonymous).thenReturn(true);
+
+            var criteria = new com.petadoption.dto.request
+                    .PetSearchCriteria("Dog", null, null, null, null,
+                    PetStatus.ADOPTED, "beagle");
+
+            var visible = petService.visibleCriteria(criteria);
+
+            assertEquals(PetStatus.AVAILABLE, visible.status());
+            assertEquals("Dog", visible.species());
+            assertEquals("beagle", visible.search());
+        }
+    }
+
+    @Test
+    void shouldLeaveCriteriaUntouchedForLoggedInUsers() {
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::isAnonymous).thenReturn(false);
+
+            var criteria = new com.petadoption.dto.request
+                    .PetSearchCriteria(null, null, null, null, null,
+                    PetStatus.ADOPTED, null);
+
+            assertSame(criteria, petService.visibleCriteria(criteria));
+        }
+    }
+
+    @Test
+    void shouldHideNonAvailablePetFromAnonymousVisitors() {
+
+        pet.setStatus(PetStatus.ADOPTED);
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::isAnonymous).thenReturn(true);
+
+            assertThrows(ResourceNotFoundException.class,
+                    () -> petService.getPetById(1L));
+        }
+    }
+
+    @Test
+    void shouldShowNonAvailablePetToLoggedInUsers() {
+
+        pet.setStatus(PetStatus.ADOPTED);
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        when(petMapper.toResponseDto(pet)).thenReturn(responseDto);
+
+        try (MockedStatic<SecurityUtil> mocked =
+                     Mockito.mockStatic(SecurityUtil.class)) {
+
+            mocked.when(SecurityUtil::isAnonymous).thenReturn(false);
+
+            assertEquals(1L, petService.getPetById(1L).id());
+        }
+    }
+
     @Test
     void shouldGetAllPets() {
 
@@ -225,7 +299,7 @@ class PetServiceImplTest {
                 .thenReturn(responseDto);
 
         PageResponseDto<PetResponseDto> result =
-                petService.getAllPets(pageable, null);
+                petService.getAllPets(pageable, EMPTY_CRITERIA);
 
         assertEquals(
                 1,

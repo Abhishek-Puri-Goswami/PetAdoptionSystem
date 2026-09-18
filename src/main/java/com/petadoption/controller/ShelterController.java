@@ -35,8 +35,7 @@ public class ShelterController {
         );
     }
 
-    @PreAuthorize(
-            "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
+    // Public (anonymous allowed): see SecurityConfig.
     @GetMapping
     public ApiResponseDto<PageResponseDto<ShelterResponseDto>>
     getAllShelters(
@@ -50,8 +49,7 @@ public class ShelterController {
         );
     }
 
-    @PreAuthorize(
-            "hasAnyRole('ADOPTER','SHELTER_ADMIN','SHELTER_STAFF','SYSTEM_ADMIN')")
+    // Public (anonymous allowed): see SecurityConfig.
     @GetMapping("/{id}")
     public ApiResponseDto<ShelterResponseDto> getShelterById(
             @PathVariable Long id) {

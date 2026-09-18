@@ -2,6 +2,7 @@ package com.petadoption.service.impl;
 
 import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.request.PetSearchCriteria;
+import com.petadoption.enums.PetStatus;
 import com.petadoption.dto.response.PageResponseDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
@@ -80,11 +81,25 @@ public class PetServiceImpl implements PetService {
 
         Page<PetResponseDto> page =
                 petRepository.findAll(
-                                PetSpecification.fromCriteria(criteria),
+                                PetSpecification.fromCriteria(visibleCriteria(criteria)),
                                 pageable)
                         .map(petMapper::toResponseDto);
 
         return PageResponseDto.from(page);
+    }
+
+    // Logged-out visitors only ever see pets that can be adopted.
+    PetSearchCriteria visibleCriteria(PetSearchCriteria criteria) {
+
+        if (!SecurityUtil.isAnonymous()) {
+            return criteria;
+        }
+
+        return new PetSearchCriteria(
+                criteria.species(), criteria.energyLevel(),
+                criteria.temperament(), criteria.minAge(),
+                criteria.maxAge(), PetStatus.AVAILABLE,
+                criteria.search());
     }
 
     @Override
@@ -95,6 +110,13 @@ public class PetServiceImpl implements PetService {
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Pet not found"));
+
+        // Hide non-available pets from anonymous callers entirely
+        // (same answer as a missing pet, so existence isn't revealed).
+        if (SecurityUtil.isAnonymous()
+                && pet.getStatus() != PetStatus.AVAILABLE) {
+            throw new ResourceNotFoundException("Pet not found");
+        }
 
         return petMapper.toResponseDto(pet);
     }
