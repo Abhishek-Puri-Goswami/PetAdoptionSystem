@@ -1,5 +1,6 @@
 package com.petadoption.ai.controller;
 
+import com.petadoption.ai.advisor.AdoptionAdvisorService;
 import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.advisor.PetMatchingAdvisorService;
 import com.petadoption.ai.dto.ChatRequestDto;
@@ -25,6 +26,7 @@ public class AiChatController {
     private final ChatClient chatClient;
     private final PetCareAdvisorService petCareAdvisorService;
     private final PetMatchingAdvisorService petMatchingAdvisorService;
+    private final AdoptionAdvisorService adoptionAdvisorService;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/ping")
@@ -62,6 +64,20 @@ public class AiChatController {
             @Valid @RequestBody ChatRequestDto request) {
 
         String reply = petMatchingAdvisorService.ask(request.message());
+
+        return new ApiResponseDto<>(
+                true,
+                "AI responded successfully",
+                new ChatResponseDto(reply)
+        );
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/chat/adoption")
+    public ApiResponseDto<ChatResponseDto> adoption(
+            @Valid @RequestBody ChatRequestDto request) {
+
+        String reply = adoptionAdvisorService.ask(request.message());
 
         return new ApiResponseDto<>(
                 true,

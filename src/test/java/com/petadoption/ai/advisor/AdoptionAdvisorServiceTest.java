@@ -2,7 +2,7 @@ package com.petadoption.ai.advisor;
 
 import com.petadoption.ai.agent.AgentExecutor;
 import com.petadoption.ai.agent.AgentResponse;
-import com.petadoption.ai.tool.PetSearchTools;
+import com.petadoption.ai.tool.AdoptionTools;
 import com.petadoption.util.SecurityUtil;
 
 import org.junit.jupiter.api.Test;
@@ -20,19 +20,19 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PetMatchingAdvisorServiceTest {
+class AdoptionAdvisorServiceTest {
 
     @Mock
     private AgentExecutor agentExecutor;
 
     @Mock
-    private PetSearchTools petSearchTools;
+    private AdoptionTools adoptionTools;
 
     @InjectMocks
-    private PetMatchingAdvisorService petMatchingAdvisorService;
+    private AdoptionAdvisorService adoptionAdvisorService;
 
     @Test
-    void shouldUseCallerEmailAsConversationId() {
+    void shouldNamespaceConversationIdByAdvisorAndCaller() {
 
         try (MockedStatic<SecurityUtil> mocked =
                      Mockito.mockStatic(SecurityUtil.class)) {
@@ -42,17 +42,17 @@ class PetMatchingAdvisorServiceTest {
 
             when(agentExecutor.execute(
                     any(),
-                    eq("pet-matching:adopter@test.com"),
-                    eq("Find me a calm dog"),
-                    eq(petSearchTools)))
+                    eq("adoption:adopter@test.com"),
+                    eq("What's my application status?"),
+                    eq(adoptionTools)))
                     .thenReturn(new AgentResponse(
-                            "Luna is a calm dog available now."));
+                            "Your application for Luna is PENDING."));
 
-            String reply = petMatchingAdvisorService.ask(
-                    "Find me a calm dog");
+            String reply = adoptionAdvisorService.ask(
+                    "What's my application status?");
 
             assertEquals(
-                    "Luna is a calm dog available now.",
+                    "Your application for Luna is PENDING.",
                     reply);
         }
     }

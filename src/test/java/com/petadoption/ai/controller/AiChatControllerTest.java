@@ -1,6 +1,7 @@
 package com.petadoption.ai.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petadoption.ai.advisor.AdoptionAdvisorService;
 import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.advisor.PetMatchingAdvisorService;
 import com.petadoption.ai.dto.ChatRequestDto;
@@ -44,6 +45,9 @@ class AiChatControllerTest {
 
     @MockitoBean
     private PetMatchingAdvisorService petMatchingAdvisorService;
+
+    @MockitoBean
+    private AdoptionAdvisorService adoptionAdvisorService;
 
     @Test
     void shouldReturnAiReply() throws Exception {
@@ -131,6 +135,28 @@ class AiChatControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.reply")
                         .value("I found Luna, an available Beagle."));
+    }
+
+    @Test
+    void shouldReturnAdoptionReply() throws Exception {
+
+        ChatRequestDto request =
+                new ChatRequestDto("What's my application status?");
+
+        when(adoptionAdvisorService.ask(
+                "What's my application status?"))
+                .thenReturn("Your application for Luna is PENDING.");
+
+        mockMvc.perform(
+                        post("/api/ai/chat/adoption")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.reply")
+                        .value("Your application for Luna is PENDING."));
     }
 
     @Test

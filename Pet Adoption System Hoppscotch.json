@@ -2324,6 +2324,29 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cv7genai0chatmatch0req001"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"message\": \"What is the status of my applications, and what are the adoption fees?\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Adoption Advisor Chat",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/ai/chat/adoption",
+          "responses": {},
+          "testScript": "",
+          "description": "Phase 4: Adoption Advisor - reports ONLY the caller's own application status (the tool takes no id argument; identity comes from the JWT) and answers process/fees/requirements questions from the RAG docs. Run 'Ingest RAG Documents' at least once first. Read-only: it never submits or changes anything.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv8genai0chatadopt0req001"
         }
       ],
       "auth": {
