@@ -2347,6 +2347,29 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cv8genai0chatadopt0req001"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "body": "{\n  \"message\": \"What are the adoption fees?\"\n}",
+            "contentType": "application/json"
+          },
+          "name": "Coordinator Chat (single entrypoint)",
+          "method": "POST",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/ai/chat",
+          "responses": {},
+          "testScript": "",
+          "description": "Phase 5a: one entrypoint. A tiny classifier (no tools, no memory) picks MATCHING, CARE, ADOPTION or UNSURE and the message goes to exactly ONE advisor. UNSURE (vague or mixed questions) returns a clarifying question. Mixed questions are handled properly in Phase 5b.",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv9genai0chatcoord0req001"
         }
       ],
       "auth": {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petadoption.ai.advisor.AdoptionAdvisorService;
 import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.advisor.PetMatchingAdvisorService;
+import com.petadoption.ai.coordinator.AdvisorCoordinatorService;
 import com.petadoption.ai.dto.ChatRequestDto;
 import com.petadoption.security.JwtAuthenticationFilter;
 
@@ -48,6 +49,29 @@ class AiChatControllerTest {
 
     @MockitoBean
     private AdoptionAdvisorService adoptionAdvisorService;
+
+    @MockitoBean
+    private AdvisorCoordinatorService advisorCoordinatorService;
+
+    @Test
+    void shouldReturnCoordinatorReply() throws Exception {
+
+        ChatRequestDto request = new ChatRequestDto("Find me a dog");
+
+        when(advisorCoordinatorService.ask("Find me a dog"))
+                .thenReturn("I found Luna.");
+
+        mockMvc.perform(
+                        post("/api/ai/chat")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.reply")
+                        .value("I found Luna."));
+    }
 
     @Test
     void shouldReturnAiReply() throws Exception {
