@@ -15,4 +15,6 @@ public interface AppointmentRepository
     boolean existsByPetId(Long petId);
 
     boolean existsBySlotId(Long slotId);
+
+    boolean existsByShelterId(Long shelterId);
 }

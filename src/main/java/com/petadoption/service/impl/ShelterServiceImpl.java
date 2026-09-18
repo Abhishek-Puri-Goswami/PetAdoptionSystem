@@ -7,7 +7,11 @@ import com.petadoption.entity.Shelter;
 import com.petadoption.exception.BusinessException;
 import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.ShelterMapper;
+import com.petadoption.repository.AppointmentRepository;
+import com.petadoption.repository.AvailabilitySlotRepository;
+import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.ShelterRepository;
+import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ImageStorageService;
 import com.petadoption.service.ShelterService;
@@ -31,6 +35,10 @@ public class ShelterServiceImpl
     private final ShelterMapper shelterMapper;
     private final AuditLogService auditLogService;
     private final ImageStorageService imageStorageService;
+    private final PetRepository petRepository;
+    private final UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final AvailabilitySlotRepository availabilitySlotRepository;
 
     @Override
     public ShelterResponseDto createShelter(
@@ -119,6 +127,17 @@ public class ShelterServiceImpl
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Shelter not found"));
+
+        // Check first: the Cloudinary image must not be deleted if the
+        // DB delete is going to be refused.
+        if (petRepository.existsByShelterId(id)
+                || userRepository.existsByShelterId(id)
+                || appointmentRepository.existsByShelterId(id)
+                || availabilitySlotRepository.existsByShelterId(id)) {
+            throw new BusinessException(
+                    "Cannot delete a shelter that still has pets, "
+                            + "staff, slots or appointments");
+        }
 
         if (StringUtils.hasText(shelter.getImagePublicId())) {
             imageStorageService.deleteImage(shelter.getImagePublicId());

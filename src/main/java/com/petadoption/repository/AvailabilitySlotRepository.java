@@ -11,6 +11,8 @@ public interface AvailabilitySlotRepository
 
     List<AvailabilitySlot> findByShelterId(Long shelterId);
 
+    boolean existsByShelterId(Long shelterId);
+
     List<AvailabilitySlot> findByShelterIdAndBookedFalseAndSlotDateTimeAfter(
             Long shelterId, LocalDateTime after);
 

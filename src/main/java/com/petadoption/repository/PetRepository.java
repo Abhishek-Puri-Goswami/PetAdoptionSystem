@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface PetRepository
         extends JpaRepository<Pet, Long>, JpaSpecificationExecutor<Pet> {
     long countByStatus(PetStatus status);
+
+    boolean existsByShelterId(Long shelterId);
 }

@@ -46,6 +46,20 @@ class ShelterServiceImplTest {
     @Mock
     private ImageStorageService imageStorageService;
 
+    @Mock
+    private com.petadoption.repository.PetRepository petRepository;
+
+    @Mock
+    private com.petadoption.repository.UserRepository userRepository;
+
+    @Mock
+    private com.petadoption.repository.AppointmentRepository
+            appointmentRepository;
+
+    @Mock
+    private com.petadoption.repository.AvailabilitySlotRepository
+            availabilitySlotRepository;
+
     @InjectMocks
     private ShelterServiceImpl shelterService;
 
@@ -297,6 +311,47 @@ class ShelterServiceImplTest {
 
         verify(shelterRepository)
                 .delete(shelter);
+    }
+
+    private void assertDeleteRefused() {
+
+        shelter.setImagePublicId("pet-adoption/shelters/abc123");
+
+        when(shelterRepository.findById(1L))
+                .thenReturn(Optional.of(shelter));
+
+        assertThrows(
+                BusinessException.class,
+                () -> shelterService.deleteShelter(1L));
+
+        // refused BEFORE touching Cloudinary or the DB
+        verify(imageStorageService, never()).deleteImage(anyString());
+        verify(shelterRepository, never()).delete(any());
+    }
+
+    @Test
+    void shouldRefuseDeleteWhenShelterHasPets() {
+        when(petRepository.existsByShelterId(1L)).thenReturn(true);
+        assertDeleteRefused();
+    }
+
+    @Test
+    void shouldRefuseDeleteWhenShelterHasUsers() {
+        when(userRepository.existsByShelterId(1L)).thenReturn(true);
+        assertDeleteRefused();
+    }
+
+    @Test
+    void shouldRefuseDeleteWhenShelterHasAppointments() {
+        when(appointmentRepository.existsByShelterId(1L)).thenReturn(true);
+        assertDeleteRefused();
+    }
+
+    @Test
+    void shouldRefuseDeleteWhenShelterHasSlots() {
+        when(availabilitySlotRepository.existsByShelterId(1L))
+                .thenReturn(true);
+        assertDeleteRefused();
     }
 
     @Test
