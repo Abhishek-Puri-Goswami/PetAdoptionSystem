@@ -87,8 +87,10 @@ def evaluate(case, status, reply, global_must_not):
         return problems
 
     for bad in global_must_not + case.get("must_not", []):
-        if bad.lower() in low:
-            problems.append(("FAIL", f"forbidden text present: {bad!r}"))
+        at = low.find(bad.lower())
+        if at >= 0:
+            context = reply[max(0, at - 40):at + len(bad) + 40]
+            problems.append(("FAIL", f"forbidden text {bad!r} in: ...{context!r}..."))
 
     kind = "WARN" if case.get("soft") else "FAIL"
     for group in case.get("must_all_groups", []):

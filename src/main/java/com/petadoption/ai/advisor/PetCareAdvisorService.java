@@ -6,6 +6,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -17,7 +18,9 @@ public class PetCareAdvisorService {
 
     public PetCareAdvisorService(
             ChatClient chatClient,
-            VectorStore vectorStore) {
+            VectorStore vectorStore,
+            @Value("${app.ai.rag.similarity-threshold:0.30}")
+            double similarityThreshold) {
 
         this.chatClient = chatClient;
 
@@ -26,7 +29,7 @@ public class PetCareAdvisorService {
                 .searchRequest(
                         SearchRequest.builder()
                                 .topK(4)
-                                .similarityThreshold(0.5)
+                                .similarityThreshold(similarityThreshold)
                                 .build())
                 .build();
     }

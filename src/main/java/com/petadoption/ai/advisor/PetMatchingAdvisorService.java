@@ -33,6 +33,9 @@ public class PetMatchingAdvisorService {
             - Only ever recommend or discuss pets that your tools
               actually returned in this conversation. Never claim a pet
               exists or is available if a tool didn't return it.
+            - Never invent API endpoints, commands, tokens, admin
+              procedures or example requests. You only search pets and
+              explain what your tools returned.
             - Your tools only ever return pets that are currently
               available for adoption. If a user asks about adopted,
               unavailable, or otherwise ineligible pets, or asks you to

@@ -7,14 +7,17 @@ import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AdoptionTools {
@@ -24,6 +27,11 @@ public class AdoptionTools {
     private final AdoptionApplicationRepository adoptionApplicationRepository;
     private final UserRepository userRepository;
     private final VectorStore vectorStore;
+
+    // Chosen from measured scores (ai-eval/rag_scores.py): off-topic
+    // questions peak ~0.24, real in-scope ones start ~0.38.
+    @Value("${app.ai.rag.similarity-threshold:0.30}")
+    private double similarityThreshold;
 
     @Tool(
             name = "getMyApplicationStatus",
@@ -51,15 +59,19 @@ public class AdoptionTools {
                     + "snippets - only answer using what this returns.")
     public List<RequirementSnippet> getAdoptionRequirements(
 
-            @ToolParam(description = "What the user wants to know about, "
-                    + "e.g. 'adoption fees' or 'application process'")
+            @ToolParam(description = "The user's question as one complete "
+                    + "natural-language sentence, in their own words, "
+                    + "e.g. 'Can I pay for my adoption through the "
+                    + "platform?'. Do NOT pass bare keywords like "
+                    + "'payment methods' - short keyword queries "
+                    + "retrieve far worse (measured).")
             String topic) {
 
-        return vectorStore.similaritySearch(
+        List<RequirementSnippet> snippets = vectorStore.similaritySearch(
                         SearchRequest.builder()
                                 .query(topic)
                                 .topK(MAX_SNIPPETS)
-                                .similarityThreshold(0.5)
+                                .similarityThreshold(similarityThreshold)
                                 .build())
                 .stream()
                 .map(document -> new RequirementSnippet(
@@ -67,6 +79,14 @@ public class AdoptionTools {
                                 document.getMetadata().get("source")),
                         document.getText()))
                 .toList();
+
+        // The model chooses `topic` itself, so recall problems usually
+        // start here: log what it asked for and what came back.
+        log.debug("getAdoptionRequirements topic='{}' -> {} snippet(s) {}",
+                topic, snippets.size(),
+                snippets.stream().map(RequirementSnippet::source).toList());
+
+        return snippets;
     }
 
     private User currentUser() {
