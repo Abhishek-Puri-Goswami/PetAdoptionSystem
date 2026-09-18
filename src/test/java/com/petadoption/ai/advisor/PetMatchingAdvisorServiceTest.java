@@ -2,16 +2,14 @@ package com.petadoption.ai.advisor;
 
 import com.petadoption.ai.agent.AgentExecutor;
 import com.petadoption.ai.agent.AgentResponse;
+import com.petadoption.ai.agent.AiConversationIds;
 import com.petadoption.ai.tool.PetSearchTools;
-import com.petadoption.util.SecurityUtil;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,32 +26,31 @@ class PetMatchingAdvisorServiceTest {
     @Mock
     private PetSearchTools petSearchTools;
 
+    @Mock
+    private AiConversationIds conversationIds;
+
     @InjectMocks
     private PetMatchingAdvisorService petMatchingAdvisorService;
 
     @Test
-    void shouldUseCallerEmailAsConversationId() {
+    void shouldUseAdvisorNamespacedUserKey() {
 
-        try (MockedStatic<SecurityUtil> mocked =
-                     Mockito.mockStatic(SecurityUtil.class)) {
+        when(conversationIds.forCurrentUser("pet-matching:"))
+                .thenReturn("pet-matching:4");
 
-            mocked.when(SecurityUtil::getCurrentUserEmail)
-                    .thenReturn("adopter@test.com");
+        when(agentExecutor.execute(
+                any(),
+                eq("pet-matching:4"),
+                eq("Find me a calm dog"),
+                eq(petSearchTools)))
+                .thenReturn(new AgentResponse(
+                        "Luna is a calm dog available now."));
 
-            when(agentExecutor.execute(
-                    any(),
-                    eq("pet-matching:adopter@test.com"),
-                    eq("Find me a calm dog"),
-                    eq(petSearchTools)))
-                    .thenReturn(new AgentResponse(
-                            "Luna is a calm dog available now."));
+        String reply = petMatchingAdvisorService.ask(
+                "Find me a calm dog");
 
-            String reply = petMatchingAdvisorService.ask(
-                    "Find me a calm dog");
-
-            assertEquals(
-                    "Luna is a calm dog available now.",
-                    reply);
-        }
+        assertEquals(
+                "Luna is a calm dog available now.",
+                reply);
     }
 }

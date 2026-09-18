@@ -56,6 +56,10 @@ spring.http.client:
   connect-timeout: 5s
   read-timeout: 30s
 
+# Chat memory lives in PostgreSQL (table SPRING_AI_CHAT_MEMORY, created by
+# Spring AI). Survives restarts; each conversation is capped at 20 messages.
+spring.ai.chat.memory.repository.jdbc.initialize-schema: always
+
 spring.ai.openai:
   api-key: ${OPENAI_API_KEY}
   base-url: ${OPENAI_BASE_URL}

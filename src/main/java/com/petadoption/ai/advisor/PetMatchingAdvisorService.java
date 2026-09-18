@@ -1,9 +1,9 @@
 package com.petadoption.ai.advisor;
 
 import com.petadoption.ai.agent.AgentExecutor;
+import com.petadoption.ai.agent.AiConversationIds;
 import com.petadoption.ai.agent.AgentResponse;
 import com.petadoption.ai.tool.PetSearchTools;
-import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -48,11 +48,12 @@ public class PetMatchingAdvisorService {
 
     private final AgentExecutor agentExecutor;
     private final PetSearchTools petSearchTools;
+    private final AiConversationIds conversationIds;
 
     public String ask(String message) {
 
         String conversationId =
-                CONVERSATION_PREFIX + SecurityUtil.getCurrentUserEmail();
+                conversationIds.forCurrentUser(CONVERSATION_PREFIX);
 
         AgentResponse response = agentExecutor.execute(
                 INSTRUCTIONS,

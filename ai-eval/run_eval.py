@@ -7,8 +7,8 @@ FAIL per case. Exit code 1 if any hard FAIL. Standard library only.
     python ai-eval/run_eval.py                 # http://localhost:8080
     python ai-eval/run_eval.py --base-url http://host:8080 --only INJ
 
-Restart the server before a run: chat memory is in-memory and the memory
-(MEM-*) cases assume a clean start. Costs roughly 30-40 model calls.
+Chat memory is persistent (Postgres) so no restart is needed; the MEM-*
+cases hold regardless of earlier runs. Costs roughly 35-40 model calls.
 """
 import argparse
 import json
