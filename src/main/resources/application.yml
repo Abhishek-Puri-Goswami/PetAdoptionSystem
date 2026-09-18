@@ -57,13 +57,13 @@ spring.http.client:
   read-timeout: 30s
 
 spring.ai.openai:
-  api-key: ${OPENAI_API_KEY:placeholder}
-  base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+  api-key: ${OPENAI_API_KEY}
+  base-url: ${OPENAI_BASE_URL}
   chat:
-    model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+    model: ${OPENAI_CHAT_MODEL}
   embedding:
-    base-url: ${OPENAI_EMBEDDING_BASE_URL:${OPENAI_BASE_URL:https://api.openai.com}}
-    model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+    base-url: ${OPENAI_EMBEDDING_BASE_URL}
+    model: ${OPENAI_EMBEDDING_MODEL}
 
 spring.ai.vectorstore.pgvector:
   initialize-schema: true
