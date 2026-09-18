@@ -15,15 +15,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.ai.chat.client.ChatClient;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AdvisorCoordinatorServiceTest {
+
+    @Mock
+    private OrchestrationPlanner planner;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ChatClient chatClient;
@@ -40,57 +45,19 @@ class AdvisorCoordinatorServiceTest {
     @InjectMocks
     private AdvisorCoordinatorService coordinator;
 
-    private void classifierReturns(String message, String label) {
+    private void mergeReturns(String reply) {
         when(chatClient.prompt()
                 .system(anyString())
-                .user(message)
+                .user(anyString())
                 .call()
                 .content())
-                .thenReturn(label);
+                .thenReturn(reply);
     }
 
     @Test
-    void shouldRouteMatchingToMatchingAdvisorOnly() {
+    void shouldAskClarifyingQuestionWhenPlanIsEmpty() {
 
-        classifierReturns("find me a calm dog", "MATCHING");
-        when(petMatchingAdvisorService.ask("find me a calm dog"))
-                .thenReturn("Luna!");
-
-        assertEquals("Luna!", coordinator.ask("find me a calm dog"));
-
-        verifyNoInteractions(petCareAdvisorService, adoptionAdvisorService);
-    }
-
-    @Test
-    void shouldRouteCareToCareAdvisorOnly() {
-
-        classifierReturns("how much exercise?", "CARE");
-        when(petCareAdvisorService.ask("how much exercise?"))
-                .thenReturn("60 minutes");
-
-        assertEquals("60 minutes", coordinator.ask("how much exercise?"));
-
-        verifyNoInteractions(
-                petMatchingAdvisorService, adoptionAdvisorService);
-    }
-
-    @Test
-    void shouldRouteAdoptionToAdoptionAdvisorOnly() {
-
-        classifierReturns("what are the fees?", "ADOPTION");
-        when(adoptionAdvisorService.ask("what are the fees?"))
-                .thenReturn("$50-$300");
-
-        assertEquals("$50-$300", coordinator.ask("what are the fees?"));
-
-        verifyNoInteractions(
-                petMatchingAdvisorService, petCareAdvisorService);
-    }
-
-    @Test
-    void shouldAskClarifyingQuestionWhenUnsure() {
-
-        classifierReturns("help", "UNSURE");
+        when(planner.plan("help")).thenReturn(List.of());
 
         assertEquals(
                 AdvisorCoordinatorService.CLARIFYING_QUESTION,
@@ -99,35 +66,100 @@ class AdvisorCoordinatorServiceTest {
         verifyNoInteractions(
                 petMatchingAdvisorService,
                 petCareAdvisorService,
-                adoptionAdvisorService);
+                adoptionAdvisorService,
+                chatClient);
     }
 
     @Test
-    void shouldTreatGarbageClassifierOutputAsUnsure() {
+    void shouldReturnSingleStepAnswerDirectlyWithoutMerging() {
 
-        classifierReturns("hi", "Sure! I think it is MATCHING.");
+        when(planner.plan("fees?")).thenReturn(List.of(
+                new PlanStep(Route.ADOPTION, "what are the fees")));
+        when(adoptionAdvisorService.ask("what are the fees"))
+                .thenReturn("$50-$300");
 
-        assertEquals(
-                AdvisorCoordinatorService.CLARIFYING_QUESTION,
-                coordinator.ask("hi"));
+        assertEquals("$50-$300", coordinator.ask("fees?"));
 
-        verify(petMatchingAdvisorService, never()).ask(anyString());
+        verifyNoInteractions(
+                petMatchingAdvisorService, petCareAdvisorService,
+                chatClient);
     }
 
     @Test
-    void shouldWrapClassifierFailureAsAiServiceException() {
+    void shouldPassEarlierAnswerIntoLaterStepAndMerge() {
 
+        when(planner.plan("dog and fee")).thenReturn(List.of(
+                new PlanStep(Route.MATCHING, "find a calm dog"),
+                new PlanStep(Route.ADOPTION, "fee for that pet")));
+        when(petMatchingAdvisorService.ask("find a calm dog"))
+                .thenReturn("Luna the Beagle");
+        when(adoptionAdvisorService.ask(contains("Luna the Beagle")))
+                .thenReturn("Dogs cost $50-$300");
+        mergeReturns("Luna fits you; fees are $50-$300.");
+
+        assertEquals("Luna fits you; fees are $50-$300.",
+                coordinator.ask("dog and fee"));
+
+        verify(adoptionAdvisorService).ask(contains("reference data"));
+    }
+
+    @Test
+    void shouldStillAnswerWhenOneStepFails() {
+
+        when(planner.plan("dog and fee")).thenReturn(List.of(
+                new PlanStep(Route.MATCHING, "find a calm dog"),
+                new PlanStep(Route.ADOPTION, "fee")));
+        when(petMatchingAdvisorService.ask("find a calm dog"))
+                .thenThrow(new AiServiceException("down"));
+        when(adoptionAdvisorService.ask("fee"))
+                .thenReturn("$50-$300");
+        // only matches if the failed step is passed to the merger
+        // marked UNAVAILABLE
         when(chatClient.prompt()
                 .system(anyString())
-                .user("hello")
+                .user(contains("UNAVAILABLE"))
                 .call()
                 .content())
-                .thenThrow(new RuntimeException("api-key=secret123"));
+                .thenReturn("Fees are $50-$300; I couldn't search pets now.");
 
-        AiServiceException ex = assertThrows(
-                AiServiceException.class,
-                () -> coordinator.ask("hello"));
+        assertEquals("Fees are $50-$300; I couldn't search pets now.",
+                coordinator.ask("dog and fee"));
+    }
 
-        assertFalse(ex.getMessage().contains("secret123"));
+    @Test
+    void shouldThrowWhenEveryStepFails() {
+
+        when(planner.plan("dog and fee")).thenReturn(List.of(
+                new PlanStep(Route.MATCHING, "a"),
+                new PlanStep(Route.ADOPTION, "b")));
+        when(petMatchingAdvisorService.ask(anyString()))
+                .thenThrow(new AiServiceException("down"));
+        when(adoptionAdvisorService.ask(anyString()))
+                .thenThrow(new AiServiceException("down"));
+
+        assertThrows(AiServiceException.class,
+                () -> coordinator.ask("dog and fee"));
+    }
+
+    @Test
+    void shouldFallBackToPlainAnswersWhenMergeFails() {
+
+        when(planner.plan("q")).thenReturn(List.of(
+                new PlanStep(Route.CARE, "a"),
+                new PlanStep(Route.ADOPTION, "b")));
+        when(petCareAdvisorService.ask("a")).thenReturn("Walk daily.");
+        when(adoptionAdvisorService.ask(contains("Walk daily.")))
+                .thenReturn("Fees vary.");
+        when(chatClient.prompt()
+                .system(anyString())
+                .user(anyString())
+                .call()
+                .content())
+                .thenThrow(new RuntimeException("merge down"));
+
+        String reply = coordinator.ask("q");
+
+        assertTrue(reply.contains("Walk daily."));
+        assertTrue(reply.contains("Fees vary."));
     }
 }

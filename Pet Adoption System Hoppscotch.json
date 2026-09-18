@@ -2366,7 +2366,7 @@
           "endpoint": "<<baseUrl>>/api/ai/chat",
           "responses": {},
           "testScript": "",
-          "description": "Phase 5a: one entrypoint. A tiny classifier (no tools, no memory) picks MATCHING, CARE, ADOPTION or UNSURE and the message goes to exactly ONE advisor. UNSURE (vague or mixed questions) returns a clarifying question. Mixed questions are handled properly in Phase 5b.",
+          "description": "Phase 5a/5b: one entrypoint with real orchestration. A planner (no tools, no memory) makes an ordered plan of 1-3 advisor steps (MATCHING, CARE, ADOPTION, each at most once). Steps run in order and later steps see earlier answers (e.g. matched pet -> its fee), then one reply is merged. If a step fails the rest still answer and the reply says which part could not be answered; if all fail -> 503. Vague messages get a clarifying question. Try: 'Find me a calm dog for my apartment and tell me the adoption fee for it'.",
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cv9genai0chatcoord0req001"
