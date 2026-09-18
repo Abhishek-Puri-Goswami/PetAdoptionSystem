@@ -141,6 +141,22 @@ class AiChatControllerTest {
     }
 
     @Test
+    void shouldRejectOverlongMessage() throws Exception {
+
+        ChatRequestDto request =
+                new ChatRequestDto("a".repeat(1001));
+
+        mockMvc.perform(
+                        post("/api/ai/chat")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void shouldReturnMatchReply() throws Exception {
 
         ChatRequestDto request =
