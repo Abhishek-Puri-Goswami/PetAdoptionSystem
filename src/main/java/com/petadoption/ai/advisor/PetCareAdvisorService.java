@@ -13,6 +13,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class PetCareAdvisorService {
 
+    private static final String INSTRUCTIONS = """
+            You are the pet care advisor for a pet adoption platform.
+            Answer ONLY from the context documents supplied with the
+            question. If the context is empty or does not contain the
+            answer, say briefly that you don't have that information.
+            Do NOT answer from general knowledge, and do NOT offer to
+            (for example never say "from general knowledge I can say...").
+            Keep answers concise.
+            """;
+
     private final ChatClient chatClient;
     private final QuestionAnswerAdvisor questionAnswerAdvisor;
 
@@ -39,6 +49,7 @@ public class PetCareAdvisorService {
         try {
 
             return chatClient.prompt()
+                    .system(INSTRUCTIONS)
                     .advisors(questionAnswerAdvisor)
                     .user(question)
                     .call()
