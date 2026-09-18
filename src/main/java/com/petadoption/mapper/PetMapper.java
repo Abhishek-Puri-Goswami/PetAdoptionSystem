@@ -3,6 +3,7 @@ package com.petadoption.mapper;
 import com.petadoption.dto.request.PetRequestDto;
 import com.petadoption.dto.response.PetResponseDto;
 import com.petadoption.entity.Pet;
+import com.petadoption.dto.response.PetImageResponseDto;
 import com.petadoption.entity.PetImage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,14 +18,22 @@ public interface PetMapper {
 
     @Mapping(target = "shelterId", source = "shelter.id")
     @Mapping(target = "shelterName", source = "shelter.name")
-    @Mapping(target = "imageUrls", source = "images", qualifiedByName = "toImageUrls")
+    @Mapping(target = "images", source = "images", qualifiedByName = "toImages")
     PetResponseDto toResponseDto(Pet pet);
 
-    @Named("toImageUrls")
-    default List<String> toImageUrls(List<PetImage> images) {
+    // Upload order (ascending id) so the gallery order is stable.
+    @Named("toImages")
+    default List<PetImageResponseDto> toImages(List<PetImage> images) {
         return images == null
                 ? List.of()
-                : images.stream().map(PetImage::getImageUrl).toList();
+                : images.stream()
+                .sorted(java.util.Comparator.comparing(
+                        PetImage::getId,
+                        java.util.Comparator.nullsFirst(
+                                java.util.Comparator.naturalOrder())))
+                .map(image -> new PetImageResponseDto(
+                        image.getId(), image.getImageUrl()))
+                .toList();
     }
 
 }

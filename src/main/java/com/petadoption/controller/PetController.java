@@ -130,4 +130,33 @@ public class PetController {
                 petService.addPetGalleryImage(id, file)
         );
     }
+
+    @PreAuthorize("hasRole('SHELTER_ADMIN')")
+    @PutMapping(
+            value = "/{petId}/images/{imageId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponseDto<PetResponseDto> replacePetGalleryImage(
+            @PathVariable Long petId,
+            @PathVariable Long imageId,
+            @RequestParam("file") MultipartFile file) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Pet gallery image replaced successfully",
+                petService.replacePetGalleryImage(petId, imageId, file)
+        );
+    }
+
+    @PreAuthorize("hasRole('SHELTER_ADMIN')")
+    @DeleteMapping("/{petId}/images/{imageId}")
+    public ApiResponseDto<PetResponseDto> deletePetGalleryImage(
+            @PathVariable Long petId,
+            @PathVariable Long imageId) {
+
+        return new ApiResponseDto<>(
+                true,
+                "Pet gallery image deleted successfully",
+                petService.deletePetGalleryImage(petId, imageId)
+        );
+    }
 }

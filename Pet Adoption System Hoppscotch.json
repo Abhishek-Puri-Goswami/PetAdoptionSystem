@@ -1179,7 +1179,7 @@
               "endpoint": "<<baseUrl>>/api/pets/<<petId>>/images",
               "responses": {},
               "testScript": "",
-              "description": "Appends a gallery photo without replacing the main image. Select a file for the 'file' form field before sending.",
+              "description": "Appends a gallery photo without replacing the main image. Select a file for the 'file' form field before sending. BREAKING (2026-09-19): PetResponseDto.imageUrls (list of strings) is now images: [{id, url}] so single images can be replaced/deleted by id.",
               "preRequestScript": "",
               "requestVariables": [
                 {
@@ -1189,6 +1189,81 @@
                 }
               ],
               "id": "cv6petgalleryimageadd01"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "body": [
+                  {
+                    "key": "file",
+                    "value": "",
+                    "active": true,
+                    "isFile": true
+                  }
+                ],
+                "contentType": "multipart/form-data"
+              },
+              "name": "Replace Pet Gallery Image",
+              "method": "PUT",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>/images/<<imageId>>",
+              "responses": {},
+              "testScript": "",
+              "description": "Replaces ONE gallery image (multipart 'file'), keeping its id; the old Cloudinary file is deleted. Own shelter only; the image must belong to the pet in the URL. Image ids come from PetResponseDto.images[].id.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "1",
+                  "active": true
+                },
+                {
+                  "key": "imageId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cv11img0replace0req0001"
+            },
+            {
+              "v": "17",
+              "auth": {
+                "token": "<<tokenShelterAdmin>>",
+                "authType": "bearer",
+                "authActive": true
+              },
+              "body": {
+                "contentType": null,
+                "body": null
+              },
+              "name": "Delete Pet Gallery Image",
+              "method": "DELETE",
+              "params": [],
+              "headers": [],
+              "endpoint": "<<baseUrl>>/api/pets/<<petId>>/images/<<imageId>>",
+              "responses": {},
+              "testScript": "",
+              "description": "Deletes ONE gallery image (row + Cloudinary file). Own shelter only. Deleting a whole pet now also cleans up its gallery.",
+              "preRequestScript": "",
+              "requestVariables": [
+                {
+                  "key": "petId",
+                  "value": "1",
+                  "active": true
+                },
+                {
+                  "key": "imageId",
+                  "value": "1",
+                  "active": true
+                }
+              ],
+              "id": "cv11img0delete0req0002"
             }
           ],
           "auth": {

@@ -19,6 +19,7 @@ import com.petadoption.repository.PetSpecification;
 import com.petadoption.repository.UserRepository;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.ImageStorageService;
+import com.petadoption.service.ShelterScopeService;
 import com.petadoption.service.PetService;
 import com.petadoption.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class PetServiceImpl implements PetService {
     private final ImageStorageService imageStorageService;
     private final UserRepository userRepository;
     private final PetImageRepository petImageRepository;
+    private final ShelterScopeService shelterScopeService;
 
     @Override
     public PetResponseDto createPet(PetRequestDto request) {
@@ -174,6 +176,13 @@ public class PetServiceImpl implements PetService {
                             + "mark it UNAVAILABLE instead");
         }
 
+        // Gallery rows reference the pet by FK (and their files live on
+        // Cloudinary), so they go first.
+        for (PetImage image : petImageRepository.findByPetId(id)) {
+            petImageRepository.delete(image);
+            imageStorageService.deleteImage(image.getImagePublicId());
+        }
+
         if (StringUtils.hasText(pet.getImagePublicId())) {
             imageStorageService.deleteImage(pet.getImagePublicId());
         }
@@ -197,16 +206,8 @@ public class PetServiceImpl implements PetService {
                                 new ResourceNotFoundException(
                                         "Pet not found"));
 
-        if (file == null || file.isEmpty()) {
-            throw new BusinessException("Image file is required");
-        }
-
-        String contentType = file.getContentType();
-
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new BusinessException(
-                    "Only image files are allowed");
-        }
+        verifyCanManage(pet);
+        validateImageFile(file);
 
         String oldPublicId = pet.getImagePublicId();
 
@@ -242,16 +243,8 @@ public class PetServiceImpl implements PetService {
                                 new ResourceNotFoundException(
                                         "Pet not found"));
 
-        if (file == null || file.isEmpty()) {
-            throw new BusinessException("Image file is required");
-        }
-
-        String contentType = file.getContentType();
-
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new BusinessException(
-                    "Only image files are allowed");
-        }
+        verifyCanManage(pet);
+        validateImageFile(file);
 
         ImageStorageService.ImageUploadResult result =
                 imageStorageService.uploadImage(file, PET_IMAGE_FOLDER);
@@ -277,5 +270,98 @@ public class PetServiceImpl implements PetService {
                                         "Pet not found"));
 
         return petMapper.toResponseDto(refreshed);
+    }
+
+    @Override
+    public PetResponseDto replacePetGalleryImage(
+            Long petId, Long imageId, MultipartFile file) {
+
+        Pet pet = findPet(petId);
+        verifyCanManage(pet);
+        validateImageFile(file);
+
+        PetImage image = findGalleryImage(petId, imageId);
+
+        String oldPublicId = image.getImagePublicId();
+
+        ImageStorageService.ImageUploadResult result =
+                imageStorageService.uploadImage(file, PET_IMAGE_FOLDER);
+
+        image.setImageUrl(result.url());
+        image.setImagePublicId(result.publicId());
+
+        petImageRepository.save(image);
+
+        imageStorageService.deleteImage(oldPublicId);
+
+        auditLogService.saveAuditLog(
+                "PET_GALLERY_IMAGE_REPLACED",
+                "Pet",
+                String.valueOf(petId),
+                SecurityUtil.getCurrentUserEmail(),
+                "Pet gallery image " + imageId + " replaced");
+
+        return petMapper.toResponseDto(findPet(petId));
+    }
+
+    @Override
+    public PetResponseDto deletePetGalleryImage(
+            Long petId, Long imageId) {
+
+        Pet pet = findPet(petId);
+        verifyCanManage(pet);
+
+        PetImage image = findGalleryImage(petId, imageId);
+
+        // DB first: a failed Cloudinary delete then only leaves an
+        // orphan file, never a row pointing at a deleted file.
+        petImageRepository.delete(image);
+        imageStorageService.deleteImage(image.getImagePublicId());
+
+        auditLogService.saveAuditLog(
+                "PET_GALLERY_IMAGE_DELETED",
+                "Pet",
+                String.valueOf(petId),
+                SecurityUtil.getCurrentUserEmail(),
+                "Pet gallery image " + imageId + " deleted");
+
+        return petMapper.toResponseDto(findPet(petId));
+    }
+
+    private Pet findPet(Long id) {
+        return petRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Pet not found"));
+    }
+
+    // The image must belong to THE pet in the URL - a right image id
+    // under a wrong pet id is "not found", never someone else's image.
+    private PetImage findGalleryImage(Long petId, Long imageId) {
+        return petImageRepository.findByIdAndPetId(imageId, petId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Pet image not found"));
+    }
+
+    private void verifyCanManage(Pet pet) {
+        shelterScopeService.verifyShelterAccess(
+                shelterScopeService.currentUser(),
+                pet.getShelter() == null
+                        ? null
+                        : pet.getShelter().getId());
+    }
+
+    private void validateImageFile(MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("Image file is required");
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BusinessException(
+                    "Only image files are allowed");
+        }
     }
 }

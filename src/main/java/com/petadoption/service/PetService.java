@@ -24,4 +24,9 @@ public interface PetService {
 
     PetResponseDto addPetGalleryImage(Long id, MultipartFile file);
 
+    PetResponseDto replacePetGalleryImage(
+            Long petId, Long imageId, MultipartFile file);
+
+    PetResponseDto deletePetGalleryImage(Long petId, Long imageId);
+
 }

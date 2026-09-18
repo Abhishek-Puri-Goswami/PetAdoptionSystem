@@ -187,9 +187,10 @@ class PetMapperTest {
                 dto.specialCareNotes()
         );
 
+        assertEquals(1, dto.images().size());
         assertEquals(
-                java.util.List.of("https://cdn.example.com/buddy2.jpg"),
-                dto.imageUrls()
+                "https://cdn.example.com/buddy2.jpg",
+                dto.images().get(0).url()
         );
 
         assertEquals(

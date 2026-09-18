@@ -34,7 +34,7 @@ public record PetResponseDto(
 
         String specialCareNotes,
 
-        List<String> imageUrls,
+        List<PetImageResponseDto> images,
 
         Long shelterId,
 

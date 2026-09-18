@@ -70,6 +70,9 @@ class PetServiceImplTest {
     @Mock
     private PetImageRepository petImageRepository;
 
+    @Mock
+    private com.petadoption.service.ShelterScopeService shelterScopeService;
+
     @InjectMocks
     private PetServiceImpl petService;
 
@@ -212,6 +215,129 @@ class PetServiceImplTest {
     private static final com.petadoption.dto.request.PetSearchCriteria
             EMPTY_CRITERIA = new com.petadoption.dto.request
             .PetSearchCriteria(null, null, null, null, null, null, null);
+
+
+    private com.petadoption.entity.PetImage galleryImage(
+            Long id, String publicId) {
+        com.petadoption.entity.PetImage image =
+                new com.petadoption.entity.PetImage();
+        image.setId(id);
+        image.setImageUrl("https://cdn/" + publicId);
+        image.setImagePublicId(publicId);
+        image.setPet(pet);
+        return image;
+    }
+
+    private org.springframework.mock.web.MockMultipartFile imageFile() {
+        return new org.springframework.mock.web.MockMultipartFile(
+                "file", "a.png", "image/png", new byte[]{1, 2, 3});
+    }
+
+    @Test
+    void shouldDeleteGalleryImageFromDbAndCloudinary() {
+
+        com.petadoption.entity.PetImage image = galleryImage(7L, "pub/7");
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        when(petImageRepository.findByIdAndPetId(7L, 1L))
+                .thenReturn(Optional.of(image));
+        when(petMapper.toResponseDto(pet)).thenReturn(responseDto);
+
+        petService.deletePetGalleryImage(1L, 7L);
+
+        verify(shelterScopeService).verifyShelterAccess(any(), any());
+        verify(petImageRepository).delete(image);
+        verify(imageStorageService).deleteImage("pub/7");
+    }
+
+    @Test
+    void shouldNotFindGalleryImageUnderWrongPet() {
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        when(petImageRepository.findByIdAndPetId(7L, 1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> petService.deletePetGalleryImage(1L, 7L));
+
+        verify(petImageRepository, never()).delete(any());
+        verify(imageStorageService, never()).deleteImage(anyString());
+    }
+
+    @Test
+    void shouldRefuseGalleryDeleteForOtherShelter() {
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        doThrow(new BusinessException("no access"))
+                .when(shelterScopeService)
+                .verifyShelterAccess(any(), any());
+
+        assertThrows(BusinessException.class,
+                () -> petService.deletePetGalleryImage(1L, 7L));
+
+        verify(petImageRepository, never()).delete(any());
+        verify(imageStorageService, never()).deleteImage(anyString());
+    }
+
+    @Test
+    void shouldReplaceGalleryImageAndDeleteOldAsset() {
+
+        com.petadoption.entity.PetImage image = galleryImage(7L, "pub/old");
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        when(petImageRepository.findByIdAndPetId(7L, 1L))
+                .thenReturn(Optional.of(image));
+        when(imageStorageService.uploadImage(any(), anyString()))
+                .thenReturn(new ImageStorageService.ImageUploadResult(
+                        "https://cdn/new", "pub/new"));
+        when(petMapper.toResponseDto(pet)).thenReturn(responseDto);
+
+        petService.replacePetGalleryImage(1L, 7L, imageFile());
+
+        assertEquals("pub/new", image.getImagePublicId());
+        assertEquals("https://cdn/new", image.getImageUrl());
+        verify(petImageRepository).save(image);
+        verify(imageStorageService).deleteImage("pub/old");
+    }
+
+    @Test
+    void shouldRejectNonImageOnGalleryReplace() {
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+
+        org.springframework.mock.web.MockMultipartFile pdf =
+                new org.springframework.mock.web.MockMultipartFile(
+                        "file", "a.pdf", "application/pdf",
+                        new byte[]{1});
+
+        assertThrows(BusinessException.class,
+                () -> petService.replacePetGalleryImage(1L, 7L, pdf));
+
+        verify(imageStorageService, never())
+                .uploadImage(any(), anyString());
+    }
+
+    @Test
+    void shouldDeleteGalleryFilesAndRowsWhenDeletingPet() {
+
+        pet.setImagePublicId("pub/primary");
+
+        com.petadoption.entity.PetImage g1 = galleryImage(7L, "pub/g1");
+        com.petadoption.entity.PetImage g2 = galleryImage(8L, "pub/g2");
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        when(petImageRepository.findByPetId(1L))
+                .thenReturn(List.of(g1, g2));
+
+        petService.deletePet(1L);
+
+        verify(petImageRepository).delete(g1);
+        verify(petImageRepository).delete(g2);
+        verify(imageStorageService).deleteImage("pub/g1");
+        verify(imageStorageService).deleteImage("pub/g2");
+        verify(imageStorageService).deleteImage("pub/primary");
+        verify(petRepository).delete(pet);
+    }
 
     @Test
     void shouldForceAvailableStatusForAnonymousVisitors() {
