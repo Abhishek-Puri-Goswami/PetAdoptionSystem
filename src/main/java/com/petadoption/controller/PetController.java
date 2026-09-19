@@ -74,7 +74,7 @@ public class PetController {
         );
     }
 
-    @PreAuthorize("hasRole('SHELTER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SHELTER_ADMIN','SYSTEM_ADMIN')")
     @PutMapping("/{id}")
     public ApiResponseDto<PetResponseDto> updatePet(
             @PathVariable Long id,
@@ -87,7 +87,7 @@ public class PetController {
         );
     }
 
-    @PreAuthorize("hasRole('SHELTER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SHELTER_ADMIN','SYSTEM_ADMIN')")
     @DeleteMapping("/{id}")
     public ApiResponseDto<String> deletePet(
             @PathVariable Long id) {

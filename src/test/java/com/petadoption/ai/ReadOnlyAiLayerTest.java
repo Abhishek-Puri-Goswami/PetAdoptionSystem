@@ -30,9 +30,12 @@ class ReadOnlyAiLayerTest {
     private static final Path AI_SOURCES =
             Path.of("src/main/java/com/petadoption/ai");
 
-    // The only file allowed to write: explicit, admin-only RAG ingestion.
-    private static final String ALLOWED_WRITER =
-            "DocumentIngestionService.java";
+    // Explicit, reviewed writers: admin-only RAG ingestion, and the chat
+    // memory retention job (purges/erases the AI's OWN stored messages,
+    // never platform data).
+    private static final Set<String> ALLOWED_WRITERS = Set.of(
+            "DocumentIngestionService.java",
+            "ChatMemoryRetentionService.java");
 
     private static final Pattern WRITE_CALL = Pattern.compile(
             "\\.(save|saveAll|saveAndFlush|delete\\w*|persist|merge"
@@ -51,8 +54,8 @@ class ReadOnlyAiLayerTest {
 
             offenders = files
                     .filter(p -> p.toString().endsWith(".java"))
-                    .filter(p -> !p.getFileName().toString()
-                            .equals(ALLOWED_WRITER))
+                    .filter(p -> !ALLOWED_WRITERS.contains(
+                            p.getFileName().toString()))
                     .filter(this::containsWriteCall)
                     .map(p -> p.getFileName().toString())
                     .toList();
@@ -71,8 +74,8 @@ class ReadOnlyAiLayerTest {
 
             List<String> offenders = files
                     .filter(p -> p.toString().endsWith(".java"))
-                    .filter(p -> !p.getFileName().toString()
-                            .equals(ALLOWED_WRITER))
+                    .filter(p -> !ALLOWED_WRITERS.contains(
+                            p.getFileName().toString()))
                     .filter(p -> read(p).contains("JdbcTemplate")
                             || read(p).contains("EntityManager"))
                     .map(p -> p.getFileName().toString())

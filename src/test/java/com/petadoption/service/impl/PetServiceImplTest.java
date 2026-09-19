@@ -73,6 +73,10 @@ class PetServiceImplTest {
     @Mock
     private com.petadoption.service.ShelterScopeService shelterScopeService;
 
+    @Mock
+    private com.petadoption.repository.MedicalRecordRepository
+            medicalRecordRepository;
+
     @InjectMocks
     private PetServiceImpl petService;
 
@@ -337,6 +341,49 @@ class PetServiceImplTest {
         verify(imageStorageService).deleteImage("pub/g2");
         verify(imageStorageService).deleteImage("pub/primary");
         verify(petRepository).delete(pet);
+    }
+
+
+    @Test
+    void shouldRefuseUpdateForOtherShelterAndChangeNothing() {
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        doThrow(new BusinessException("no access"))
+                .when(shelterScopeService)
+                .verifyShelterAccess(any(), any());
+
+        assertThrows(BusinessException.class,
+                () -> petService.updatePet(1L, requestDto));
+
+        verify(petRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRefuseDeleteForOtherShelterAndTouchNothing() {
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        doThrow(new BusinessException("no access"))
+                .when(shelterScopeService)
+                .verifyShelterAccess(any(), any());
+
+        assertThrows(BusinessException.class,
+                () -> petService.deletePet(1L));
+
+        verify(petRepository, never()).delete(any(Pet.class));
+        verify(imageStorageService, never()).deleteImage(anyString());
+    }
+
+    @Test
+    void shouldRefuseDeleteWhenPetHasMedicalRecords() {
+
+        when(petRepository.findById(1L)).thenReturn(Optional.of(pet));
+        when(medicalRecordRepository.existsByPetId(1L)).thenReturn(true);
+
+        assertThrows(BusinessException.class,
+                () -> petService.deletePet(1L));
+
+        verify(petRepository, never()).delete(any(Pet.class));
+        verify(imageStorageService, never()).deleteImage(anyString());
     }
 
     @Test

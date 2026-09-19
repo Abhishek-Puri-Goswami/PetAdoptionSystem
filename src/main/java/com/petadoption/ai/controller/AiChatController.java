@@ -3,6 +3,7 @@ package com.petadoption.ai.controller;
 import com.petadoption.ai.advisor.AdoptionAdvisorService;
 import com.petadoption.ai.advisor.PetCareAdvisorService;
 import com.petadoption.ai.advisor.PetMatchingAdvisorService;
+import com.petadoption.ai.agent.ChatMemoryRetentionService;
 import com.petadoption.ai.coordinator.AdvisorCoordinatorService;
 import com.petadoption.ai.dto.ChatRequestDto;
 import com.petadoption.ai.dto.ChatResponseDto;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,7 @@ public class AiChatController {
     private final PetMatchingAdvisorService petMatchingAdvisorService;
     private final AdoptionAdvisorService adoptionAdvisorService;
     private final AdvisorCoordinatorService advisorCoordinatorService;
+    private final ChatMemoryRetentionService chatMemoryRetentionService;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/chat")
@@ -41,6 +44,19 @@ public class AiChatController {
                 true,
                 "AI responded successfully",
                 new ChatResponseDto(reply)
+        );
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/chat/history")
+    public ApiResponseDto<String> clearChatHistory() {
+
+        chatMemoryRetentionService.clearMyHistory();
+
+        return new ApiResponseDto<>(
+                true,
+                "Your AI chat history was erased",
+                null
         );
     }
 

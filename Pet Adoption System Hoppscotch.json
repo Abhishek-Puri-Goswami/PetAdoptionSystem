@@ -1078,7 +1078,7 @@
               "endpoint": "<<baseUrl>>/api/pets/<<petId>>",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": " Since 2026-09-19: a SHELTER_ADMIN can only change pets of their OWN shelter (400 otherwise); SYSTEM_ADMIN may also use this (needed for legacy pets with no shelter).",
               "preRequestScript": "",
               "requestVariables": [
                 {
@@ -1107,7 +1107,7 @@
               "endpoint": "<<baseUrl>>/api/pets/<<petId>>",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": " Since 2026-09-19: a SHELTER_ADMIN can only change pets of their OWN shelter (400 otherwise); SYSTEM_ADMIN may also use this (needed for legacy pets with no shelter). Deleting a pet that has medical records is refused (400).",
               "preRequestScript": "",
               "requestVariables": [
                 {
@@ -2533,6 +2533,29 @@
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cv9genai0chatcoord0req001"
+        },
+        {
+          "v": "17",
+          "auth": {
+            "token": "<<tokenAdopter>>",
+            "authType": "bearer",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "name": "Clear My AI Chat History",
+          "method": "DELETE",
+          "params": [],
+          "headers": [],
+          "endpoint": "<<baseUrl>>/api/ai/chat/history",
+          "responses": {},
+          "testScript": "",
+          "description": "Erases the CALLER's own stored AI conversations (all advisors). Identity comes from the JWT. Inactive conversations are also purged automatically after app.ai.memory.retention-days (default 30) by a job on app.ai.memory.purge-cron (default daily 03:00).",
+          "preRequestScript": "",
+          "requestVariables": [],
+          "id": "cv12ai0clearhistory0req1"
         }
       ],
       "auth": {

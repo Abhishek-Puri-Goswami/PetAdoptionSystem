@@ -53,6 +53,24 @@ class AiChatControllerTest {
     @MockitoBean
     private AdvisorCoordinatorService advisorCoordinatorService;
 
+    @MockitoBean
+    private com.petadoption.ai.agent.ChatMemoryRetentionService
+            chatMemoryRetentionService;
+
+    @Test
+    void shouldClearOwnChatHistory() throws Exception {
+
+        mockMvc.perform(
+                        org.springframework.test.web.servlet.request
+                                .MockMvcRequestBuilders
+                                .delete("/api/ai/chat/history"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+
+        org.mockito.Mockito.verify(chatMemoryRetentionService)
+                .clearMyHistory();
+    }
+
     @Test
     void shouldReturnCoordinatorReply() throws Exception {
 

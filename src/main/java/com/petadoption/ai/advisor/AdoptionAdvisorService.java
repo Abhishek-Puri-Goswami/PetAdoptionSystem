@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AdoptionAdvisorService {
 
-    private static final String CONVERSATION_PREFIX = "adoption:";
+    private static final String CONVERSATION_PREFIX =
+            AiConversationIds.ADOPTION;
 
     private static final String INSTRUCTIONS = """
             You are an adoption assistant for a pet adoption platform.

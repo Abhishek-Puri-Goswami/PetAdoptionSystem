@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PetMatchingAdvisorService {
 
-    private static final String CONVERSATION_PREFIX = "pet-matching:";
+    private static final String CONVERSATION_PREFIX =
+            AiConversationIds.PET_MATCHING;
 
     private static final String INSTRUCTIONS = """
             You are a pet-matching assistant for a pet adoption platform.

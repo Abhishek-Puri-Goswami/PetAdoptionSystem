@@ -19,6 +19,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AiConversationIds {
 
+    // One prefix per advisor that keeps memory (shared with the advisors
+    // and with history erasure so they can never drift apart).
+    public static final String PET_MATCHING = "pet-matching:";
+    public static final String ADOPTION = "adoption:";
+    public static final java.util.List<String> ALL_ADVISORS =
+            java.util.List.of(PET_MATCHING, ADOPTION);
+
     private final UserRepository userRepository;
 
     public String forCurrentUser(String advisorPrefix) {

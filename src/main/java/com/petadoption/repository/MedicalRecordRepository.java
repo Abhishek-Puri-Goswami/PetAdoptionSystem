@@ -9,4 +9,6 @@ public interface MedicalRecordRepository
         extends JpaRepository<MedicalRecord, Long> {
 
     List<MedicalRecord> findByPetId(Long petId);
+
+    boolean existsByPetId(Long petId);
 }

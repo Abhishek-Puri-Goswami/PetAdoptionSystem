@@ -13,6 +13,7 @@ import com.petadoption.exception.ResourceNotFoundException;
 import com.petadoption.mapper.PetMapper;
 import com.petadoption.repository.AdoptionApplicationRepository;
 import com.petadoption.repository.AppointmentRepository;
+import com.petadoption.repository.MedicalRecordRepository;
 import com.petadoption.repository.PetImageRepository;
 import com.petadoption.repository.PetRepository;
 import com.petadoption.repository.PetSpecification;
@@ -44,6 +45,7 @@ public class PetServiceImpl implements PetService {
     private final UserRepository userRepository;
     private final PetImageRepository petImageRepository;
     private final ShelterScopeService shelterScopeService;
+    private final MedicalRecordRepository medicalRecordRepository;
 
     @Override
     public PetResponseDto createPet(PetRequestDto request) {
@@ -134,6 +136,8 @@ public class PetServiceImpl implements PetService {
                                 new ResourceNotFoundException(
                                         "Pet not found"));
 
+        verifyCanManage(pet);
+
         pet.setName(request.name());
         pet.setSpecies(request.species());
         pet.setBreed(request.breed());
@@ -166,6 +170,15 @@ public class PetServiceImpl implements PetService {
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Pet not found"));
+
+        verifyCanManage(pet);
+
+        // Health history is never silently destroyed with the pet.
+        if (medicalRecordRepository.existsByPetId(id)) {
+            throw new BusinessException(
+                    "Cannot delete a pet that has medical records; "
+                            + "mark it UNAVAILABLE instead");
+        }
 
         if (adoptionApplicationRepository.existsByPetId(id)
                 || appointmentRepository.existsByPetId(id)) {
