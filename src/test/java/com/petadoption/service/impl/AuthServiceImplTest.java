@@ -86,6 +86,95 @@ class AuthServiceImplTest {
     }
 
     @Test
+    void shouldStoreAndCheckEmailInLowercase() {
+
+        RegisterRequestDto mixedCase = new RegisterRequestDto(
+                "Abhishek", "Goswami", "  Test@Test.COM ", "password");
+
+        Role role = new Role();
+        role.setName(RoleType.ROLE_ADOPTER);
+
+        User savedUser = new User();
+        savedUser.setId(1L);
+        savedUser.setEmail("test@test.com");
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.empty());
+        when(roleRepository.findByName(RoleType.ROLE_ADOPTER))
+                .thenReturn(Optional.of(role));
+        when(passwordEncoder.encode("password"))
+                .thenReturn("encoded-password");
+        when(userRepository.save(any(User.class)))
+                .thenReturn(savedUser);
+        when(jwtService.generateToken("test@test.com"))
+                .thenReturn("jwt-token");
+
+        authService.register(mixedCase);
+
+        org.mockito.ArgumentCaptor<User> saved =
+                org.mockito.ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(saved.capture());
+
+        // stored in canonical form, and the duplicate check used it too
+        assertEquals("test@test.com", saved.getValue().getEmail());
+        verify(userRepository).findByEmail("test@test.com");
+    }
+
+    @Test
+    void shouldRejectDuplicateEmailThatDiffersOnlyByCase() {
+
+        RegisterRequestDto upper = new RegisterRequestDto(
+                "Abhishek", "Goswami", "TEST@TEST.COM", "password");
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(new User()));
+
+        assertThrows(BusinessException.class,
+                () -> authService.register(upper));
+
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void shouldLogInWithMixedCaseEmail() {
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+        user.setPassword("encoded");
+        user.setEnabled(true);
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("password", "encoded"))
+                .thenReturn(true);
+        when(jwtService.generateToken("test@test.com"))
+                .thenReturn("jwt-token");
+
+        AuthResponseDto response = authService.login(
+                new LoginRequestDto("Test@TEST.com ", "password"));
+
+        assertEquals("jwt-token", response.getToken());
+    }
+
+    @Test
+    void shouldFindAccountForForgotPasswordWithMixedCaseEmail() {
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(user));
+
+        authService.forgotPassword(
+                new ForgotPasswordRequestDto("TEST@test.com"));
+
+        verify(passwordResetTokenRepository)
+                .save(any(PasswordResetToken.class));
+    }
+
+    @Test
     void shouldRegisterUserSuccessfully() {
 
         Role role = new Role();

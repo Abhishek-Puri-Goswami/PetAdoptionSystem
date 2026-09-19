@@ -86,6 +86,9 @@ ALTER TABLE availability_slots ALTER COLUMN slot_date_time SET NOT NULL;
 ALTER TABLE users DROP CONSTRAINT IF EXISTS chk_users_email;
 ALTER TABLE users ADD  CONSTRAINT chk_users_email
     CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$');
+-- emails are stored trimmed + lowercase (EmailUtil.normalize), so A@x.com and a@x.com are one account
+ALTER TABLE users DROP CONSTRAINT IF EXISTS chk_users_email_lowercase;
+ALTER TABLE users ADD  CONSTRAINT chk_users_email_lowercase CHECK (email = lower(email));
 ALTER TABLE users DROP CONSTRAINT IF EXISTS chk_users_phone;
 ALTER TABLE users ADD  CONSTRAINT chk_users_phone
     CHECK (phone IS NULL OR phone ~ '^\+?[0-9]{7,15}$');

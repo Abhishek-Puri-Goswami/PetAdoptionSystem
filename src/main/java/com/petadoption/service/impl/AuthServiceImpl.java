@@ -19,6 +19,7 @@ import com.petadoption.repository.UserRepository;
 import com.petadoption.security.JwtService;
 import com.petadoption.service.AuditLogService;
 import com.petadoption.service.AuthService;
+import com.petadoption.util.EmailUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto register(RegisterRequestDto request) {
 
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        String email = EmailUtil.normalize(request.email());
+
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new BusinessException("Email already registered");
         }
 
@@ -53,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
-        user.setEmail(request.email());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.password()));
 
         user.getRoles().add(adopterRole);
@@ -89,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponseDto login(LoginRequestDto request) {
 
         User user = userRepository.findByEmail(
-                        request.email())
+                        EmailUtil.normalize(request.email()))
                 .orElseThrow(() ->
                         new BusinessException(
                                 "Invalid email or password"));
@@ -131,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void forgotPassword(ForgotPasswordRequestDto request) {
 
-        userRepository.findByEmail(request.email())
+        userRepository.findByEmail(EmailUtil.normalize(request.email()))
                 .ifPresent(user -> {
 
                     String token = UUID.randomUUID().toString();

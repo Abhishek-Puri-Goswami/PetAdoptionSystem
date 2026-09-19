@@ -26,6 +26,11 @@ examples as this document. If you change a rule, change `Rules.java`, this file,
   as `null` (or left out). An empty string `""` fails patterns such as phone and postal code.
   The `validation.js` helper `emptyToNull` does this.
 - **Required** = present and not blank. `@NotBlank` (text) or `@NotNull` (numbers, dates, enums).
+- **Emails are case-insensitive.** The API stores and looks up emails trimmed and lowercase, so
+  `Asha@Example.com` and `asha@example.com` are the same account (register, login and forgot-password
+  all normalise). The database also refuses any email that is not lowercase. Spaces around an email are a
+  validation error (the frontend trims first), while letter case is always accepted. Show the email exactly
+  as the API returns it (lowercase).
 - Length limits count characters (UTF-16 code units, the same as JavaScript `string.length`).
 - Messages are user-safe and identical in the API and in `validation.js`, so the user sees the
   same sentence whichever layer catches the mistake.
@@ -55,7 +60,7 @@ so accounts created before the rules still sign in.
 |---|---|---|---|---|
 | POST `/api/auth/register` | `firstName` | R | person name, 1-50 | `users.first_name varchar(50) NOT NULL` |
 | | `lastName` | R | person name, 1-50 | `users.last_name varchar(50) NOT NULL` |
-| | `email` | R | email, max 254 | `users.email varchar(254) NOT NULL UNIQUE` + CHECK regex |
+| | `email` | R | email, max 254; stored lowercase | `users.email varchar(254) NOT NULL UNIQUE` + CHECK regex + CHECK lowercase |
 | | `password` | R | password policy | only the BCrypt hash is stored |
 | POST `/api/auth/login` | `email` | R | max 254 | - |
 | | `password` | R | max 64 (no policy) | - |
