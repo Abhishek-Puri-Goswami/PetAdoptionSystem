@@ -99,7 +99,7 @@ public class UserController {
     @PutMapping("/{id}/shelter")
     public ApiResponseDto<UserResponseDto> assignShelter(
             @PathVariable Long id,
-            @RequestBody AssignShelterRequestDto request) {
+            @Valid @RequestBody AssignShelterRequestDto request) {
 
         return new ApiResponseDto<>(
                 true,

@@ -3,6 +3,7 @@ package com.petadoption.entity;
 import com.petadoption.enums.AppointmentStatus;
 import lombok.Data;
 
+import com.petadoption.validation.Rules;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ public class Appointment extends BaseEntity {
 
     private LocalDateTime appointmentDateTime;
 
-    @Column(length = 500)
+    @Column(length = Rules.NOTES_MAX)
     private String notes;
 
     @Enumerated(EnumType.STRING)

@@ -92,7 +92,7 @@ public class AdoptionController {
     public ApiResponseDto<AdoptionResponseDto>
     approveApplication(
             @PathVariable Long id,
-            @RequestBody(required = false)
+            @Valid @RequestBody(required = false)
             AdoptionDecisionRequestDto decision) {
 
         return new ApiResponseDto<>(
@@ -107,7 +107,7 @@ public class AdoptionController {
     public ApiResponseDto<AdoptionResponseDto>
     rejectApplication(
             @PathVariable Long id,
-            @RequestBody(required = false)
+            @Valid @RequestBody(required = false)
             AdoptionDecisionRequestDto decision) {
 
         return new ApiResponseDto<>(

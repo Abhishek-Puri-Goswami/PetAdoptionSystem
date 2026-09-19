@@ -42,7 +42,7 @@ class AuthControllerTest {
                         "Abhishek",
                         "Goswami",
                         "test@test.com",
-                        "Password123"
+                        "Password@123"
                 );
 
         AuthResponseDto response =

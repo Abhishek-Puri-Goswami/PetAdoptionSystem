@@ -2,6 +2,7 @@ package com.petadoption.entity;
 
 import lombok.Data;
 
+import com.petadoption.validation.Rules;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public class AvailabilitySlot extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private LocalDateTime slotDateTime;
 
     private boolean booked = false;

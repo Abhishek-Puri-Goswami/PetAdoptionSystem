@@ -1,12 +1,13 @@
 package com.petadoption.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import com.petadoption.validation.Rules;
+import jakarta.validation.constraints.*;
 
 public record ForgotPasswordRequestDto(
 
-        @NotBlank
-        @Email
+        @NotBlank(message = "Email is required")
+        @Size(max = Rules.EMAIL_MAX, message = Rules.EMAIL_MESSAGE)
+        @Pattern(regexp = Rules.EMAIL_REGEX, message = Rules.EMAIL_MESSAGE)
         String email
 ) {
 }

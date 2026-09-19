@@ -175,7 +175,7 @@
           "endpoint": "<<baseUrl>>/api/auth/register",
           "responses": {},
           "testScript": "pw.env.set(\"tokenAdopter\", pw.response.body.data.token);",
-          "description": null,
+          "description": "Validation (2026-09-19): every body must satisfy docs/VALIDATION_RULES.md. Optional fields: send null, never an empty string. Failed validation returns 400 with fieldErrors.",
           "preRequestScript": "",
           "requestVariables": [],
           "id": "cmtr7rsoo0jpeev1ir2hz1fx3"
@@ -665,7 +665,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"PetConnect Rescue Center\",\n  \"email\": \"info@petconnect.org\",\n  \"phone\": \"+91-9876543210\",\n  \"addressLine1\": \"45 MG Road\",\n  \"addressLine2\": \"Opposite Metro Station\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"description\": \"Provides pet rescue, medical care, foster support, and adoption services for homeless animals.\"\n}\n",
+                "body": "{\n  \"name\": \"PetConnect Rescue Center\",\n  \"email\": \"info@petconnect.org\",\n  \"phone\": \"+919876543210\",\n  \"addressLine1\": \"45 MG Road\",\n  \"addressLine2\": \"Opposite Metro Station\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"description\": \"Provides pet rescue, medical care, foster support, and adoption services for homeless animals.\"\n}\n",
                 "contentType": "application/json"
               },
               "name": "Create Shelter",
@@ -675,7 +675,7 @@
               "endpoint": "<<baseUrl>>/api/shelters",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": "Validation (2026-09-19): every body must satisfy docs/VALIDATION_RULES.md. Optional fields: send null, never an empty string. Failed validation returns 400 with fieldErrors.",
               "preRequestScript": "",
               "requestVariables": [],
               "id": "cmtws7ina0120el1ioi8m55bg"
@@ -688,7 +688,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"PetConnect Rescue Center\",\n  \"email\": \"info@petconnect.org\",\n  \"phone\": \"+91-9876543210\",\n  \"addressLine1\": \"45 MG Road\",\n  \"addressLine2\": \"Opposite Metro Station\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"description\": \"Provides pet rescue, medical care, foster support, and adoption services for homeless animals.\"\n}\n",
+                "body": "{\n  \"name\": \"PetConnect Rescue Center\",\n  \"email\": \"info@petconnect.org\",\n  \"phone\": \"+919876543210\",\n  \"addressLine1\": \"45 MG Road\",\n  \"addressLine2\": \"Opposite Metro Station\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"description\": \"Provides pet rescue, medical care, foster support, and adoption services for homeless animals.\"\n}\n",
                 "contentType": "application/json"
               },
               "name": "Update Shelter",
@@ -1045,7 +1045,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"Charlie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"HIGH\",\n  \"temperament\": \"PLAYFUL\",\n  \"sterilized\": true,\n  \"specialCareNotes\": null\n}",
+                "body": "{\n  \"name\": \"Charlie\",\n  \"species\": \"Dog\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"Male\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"HIGH\",\n  \"temperament\": \"PLAYFUL\",\n  \"sterilized\": true,\n  \"specialCareNotes\": null\n}",
                 "contentType": "application/json"
               },
               "name": "Create Pet",
@@ -1055,7 +1055,7 @@
               "endpoint": "<<baseUrl>>/api/pets",
               "responses": {},
               "testScript": "",
-              "description": null,
+              "description": "Validation (2026-09-19): every body must satisfy docs/VALIDATION_RULES.md. Optional fields: send null, never an empty string. Failed validation returns 400 with fieldErrors.",
               "preRequestScript": "",
               "requestVariables": [],
               "id": "cmu1i70rj1cg6di1ihjlltiye"
@@ -1068,7 +1068,7 @@
                 "authActive": true
               },
               "body": {
-                "body": "{\n  \"name\": \"Roodie\",\n  \"species\": \"DOG\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"MEDIUM\",\n  \"temperament\": \"AFFECTIONATE\",\n  \"sterilized\": true,\n  \"specialCareNotes\": \"Needs joint supplements daily\"\n}",
+                "body": "{\n  \"name\": \"Roodie\",\n  \"species\": \"Dog\",\n  \"breed\": \"Golden Retriever\",\n  \"age\": 3,\n  \"gender\": \"Male\",\n  \"description\": \"Friendly and energetic Golden Retriever. Vaccinated, healthy, and great with children.\",\n  \"energyLevel\": \"MEDIUM\",\n  \"temperament\": \"AFFECTIONATE\",\n  \"sterilized\": true,\n  \"specialCareNotes\": \"Needs joint supplements daily\"\n}",
                 "contentType": "application/json"
               },
               "name": "Edit Pet by Id",

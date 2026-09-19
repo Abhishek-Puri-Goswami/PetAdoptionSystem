@@ -16,10 +16,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import com.petadoption.exception.BusinessException;
+import com.petadoption.validation.Rules;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Validated
 @RestController
 @RequestMapping("/api/pets")
 @RequiredArgsConstructor
@@ -43,13 +50,17 @@ public class PetController {
     @GetMapping
     public ApiResponseDto<PageResponseDto<PetResponseDto>> getAllPets(
             @PageableDefault(size = 20) Pageable pageable,
-            @RequestParam(required = false) String species,
+            @RequestParam(required = false) @Size(max = Rules.SPECIES_MAX, message = "Species filter must be at most 20 characters") String species,
             @RequestParam(required = false) EnergyLevel energyLevel,
             @RequestParam(required = false) Temperament temperament,
-            @RequestParam(required = false) Integer minAge,
-            @RequestParam(required = false) Integer maxAge,
+            @RequestParam(required = false) @Min(value = 0, message = "minAge must be between 0 and 40") @Max(value = Rules.PET_AGE_MAX, message = "minAge must be between 0 and 40") Integer minAge,
+            @RequestParam(required = false) @Min(value = 0, message = "maxAge must be between 0 and 40") @Max(value = Rules.PET_AGE_MAX, message = "maxAge must be between 0 and 40") Integer maxAge,
             @RequestParam(required = false) PetStatus status,
-            @RequestParam(required = false) String search) {
+            @RequestParam(required = false) @Size(max = Rules.SEARCH_MAX, message = "Search text must be at most 100 characters") String search) {
+
+        if (minAge != null && maxAge != null && minAge > maxAge) {
+            throw new BusinessException("minAge cannot be greater than maxAge");
+        }
 
         PetSearchCriteria criteria = new PetSearchCriteria(
                 species, energyLevel, temperament,

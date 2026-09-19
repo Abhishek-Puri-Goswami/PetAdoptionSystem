@@ -12,10 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import com.petadoption.validation.Rules;
+import jakarta.validation.constraints.Size;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Validated
 @RestController
 @RequestMapping("/api/shelters")
 @RequiredArgsConstructor
@@ -40,7 +44,7 @@ public class ShelterController {
     public ApiResponseDto<PageResponseDto<ShelterResponseDto>>
     getAllShelters(
             @PageableDefault(size = 20) Pageable pageable,
-            @RequestParam(required = false) String name) {
+            @RequestParam(required = false) @Size(max = Rules.SEARCH_MAX, message = "Name filter must be at most 100 characters") String name) {
 
         return new ApiResponseDto<>(
                 true,

@@ -1,6 +1,7 @@
 package com.petadoption.exception;
 
 import com.petadoption.dto.response.ErrorResponseDto;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -12,6 +13,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -73,9 +76,46 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleValidationException(
             MethodArgumentNotValidException ex) {
 
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+
+        // "roles[]" (a collection element) becomes just "roles" so a form
+        // can match the error to its field.
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                fieldErrors.putIfAbsent(
+                        error.getField().replaceAll("\\[[^\\]]*\\]", ""),
+                        error.getDefaultMessage()));
+
         String message = ex.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
+                .getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+
+        return validationBody(message, fieldErrors);
+    }
+
+    // Query parameters validated with @Validated on a controller.
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponseDto> handleConstraintViolation(
+            ConstraintViolationException ex) {
+
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+
+        ex.getConstraintViolations().forEach(violation -> {
+            String path = violation.getPropertyPath().toString();
+            fieldErrors.putIfAbsent(
+                    path.substring(path.lastIndexOf('.') + 1),
+                    violation.getMessage());
+        });
+
+        String message = fieldErrors.values().stream()
+                .findFirst().orElse("Validation failed");
+
+        return validationBody(message, fieldErrors);
+    }
+
+    private ResponseEntity<ErrorResponseDto> validationBody(
+            String message, Map<String, String> fieldErrors) {
 
         return ResponseEntity.badRequest()
                 .body(ErrorResponseDto.builder()
@@ -83,6 +123,7 @@ public class GlobalExceptionHandler {
                         .status(HttpStatus.BAD_REQUEST.value())
                         .error("Validation Error")
                         .message(message)
+                        .fieldErrors(fieldErrors)
                         .build());
     }
 

@@ -1,6 +1,7 @@
 package com.petadoption.entity;
 
 import com.petadoption.enums.ApplicationStatus;
+import com.petadoption.validation.Rules;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,24 +18,25 @@ public class AdoptionApplication extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 2000)
+    @Column(length = Rules.APPLICANT_NOTES_MAX)
     private String applicantNotes;
 
-    @Column(length = 1000)
+    @Column(length = Rules.NOTES_MAX)
     private String livingSituation;
 
-    @Column(length = 1000)
+    @Column(length = Rules.NOTES_MAX)
     private String priorPetExperience;
 
-    @Column(length = 1000)
+    @Column(length = Rules.NOTES_MAX)
     private String householdDetails;
 
+    @Column(length = Rules.PREFERRED_CONTACT_MAX)
     private String preferredContact;
 
-    @Column(length = 1000)
+    @Column(length = Rules.NOTES_MAX)
     private String reviewNotes;
 
-    @Column(length = 1000)
+    @Column(length = Rules.NOTES_MAX)
     private String rejectionReason;
 
     @Enumerated(EnumType.STRING)

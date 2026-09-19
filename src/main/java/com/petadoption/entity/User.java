@@ -1,5 +1,6 @@
 package com.petadoption.entity;
 
+import com.petadoption.validation.Rules;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,13 +20,13 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = Rules.NAME_MAX)
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = Rules.NAME_MAX)
     private String lastName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = Rules.EMAIL_MAX)
     private String email;
 
     @Column(nullable = false)
@@ -33,18 +34,25 @@ public class User extends BaseEntity {
 
     private boolean enabled = true;
 
+    @Column(length = Rules.PHONE_MAX)
     private String phone;
 
+    @Column(length = Rules.ADDRESS_LINE_MAX)
     private String addressLine1;
 
+    @Column(length = Rules.ADDRESS_LINE_MAX)
     private String addressLine2;
 
+    @Column(length = Rules.PLACE_MAX)
     private String city;
 
+    @Column(length = Rules.PLACE_MAX)
     private String state;
 
+    @Column(length = Rules.POSTAL_MAX)
     private String postalCode;
 
+    @Column(length = Rules.PLACE_MAX)
     private String country;
 
     @ManyToOne
